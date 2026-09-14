@@ -2,6 +2,26 @@ const {createClient}=supabase;
 const db=createClient(window.SUPABASE_URL,window.SUPABASE_PUBLISHABLE_KEY);
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const arDigits=s=>String(s??'').replace(/[0-9]/g,d=>'٠١٢٣٤٥٦٧٨٩'[Number(d)]);
+function renderAdminMath(raw){
+  let s=String(raw??'');
+  const frac=(a,b)=>`<span dir="ltr" style="display:inline-flex;vertical-align:middle;flex-direction:column;align-items:center;line-height:1.05;margin:0 .15em"><span style="padding:0 .18em;border-bottom:1.5px solid currentColor">${esc(arDigits(a))}</span><span style="padding:0 .18em">${esc(arDigits(b))}</span></span>`;
+  const sqrt=x=>`<span dir="ltr" style="display:inline-flex;align-items:flex-start;vertical-align:middle"><span style="font-size:1.15em;line-height:1">√</span><span style="border-top:1.5px solid currentColor;padding:0 .14em">${esc(arDigits(x))}</span></span>`;
+  const pow=(a,b)=>`<span dir="ltr" style="display:inline-block;white-space:nowrap"><span>${esc(arDigits(a))}</span><sup style="font-size:.72em;line-height:0">${esc(arDigits(b))}</sup></span>`;
+  const holds=[]; const hold=h=>{const k=`@@M${holds.length}@@`;holds.push(h);return k};
+  s=s.replace(/\{\{\s*frac\s*:\s*([^}:]+)\s*:\s*([^}]+)\}\}/gi,(_,a,b)=>hold(frac(a,b)))
+     .replace(/\{\{\s*([^}:]+)\s*:\s*([^}:]+)\s*:\s*frac\s*\}\}/gi,(_,a,b)=>hold(frac(a,b)))
+     .replace(/\{\{\s*sqrt\s*:\s*([^}]+)\}\}/gi,(_,x)=>hold(sqrt(x)))
+     .replace(/\{\{\s*([^}:]+)\s*:\s*sqrt\s*\}\}/gi,(_,x)=>hold(sqrt(x)))
+     .replace(/\{\{\s*pow\s*:\s*([^}:]+)\s*:\s*([^}]+)\}\}/gi,(_,a,b)=>hold(pow(a,b)))
+     .replace(/\{\{\s*([^}:]+)\s*:\s*([^}:]+)\s*:\s*pow\s*\}\}/gi,(_,a,b)=>hold(pow(a,b)))
+     .replace(/([0-9٠-٩]+)\s*\/\s*([0-9٠-٩]+)/g,(_,a,b)=>hold(frac(a,b)))
+     .replace(/√\s*([0-9٠-٩]+)/g,(_,x)=>hold(sqrt(x)))
+     .replace(/([0-9٠-٩]+)\s*\^\s*([0-9٠-٩]+)/g,(_,a,b)=>hold(pow(a,b)));
+  s=esc(arDigits(s));
+  holds.forEach((h,i)=>{s=s.split(`@@M${i}@@`).join(h)});
+  return s;
+}
 let skills=[],questions=[],questionPage=0;const pageSize=20;
 
 document.addEventListener('DOMContentLoaded',init);
@@ -86,7 +106,7 @@ async function loadQuestions(){
   $('prevPage').disabled=questionPage===0;$('nextPage').disabled=(questionPage+1)*pageSize>=(count??0);
 }
 function renderQuestions(){
-  $('questionsTable').innerHTML=questions.map(q=>`<tr><td class="questionCell" title="${esc(q.question_text)}">${esc(q.question_text)}</td><td>${q.section==='quantitative'?'كمي':'لفظي'}</td><td>${esc(q.skills?.name_ar||'—')}</td><td>${difficultyLabel(q.difficulty)}</td><td><span class="pill ${q.status}">${statusLabel(q.status)}</span></td><td><div class="rowActions"><button data-edit="${q.id}">تعديل</button><button class="delete" data-delete="${q.id}">حذف</button></div></td></tr>`).join('');
+  $('questionsTable').innerHTML=questions.map(q=>`<tr><td class="questionCell" title="${esc(q.question_text)}">${renderAdminMath(q.question_text)}</td><td>${q.section==='quantitative'?'كمي':'لفظي'}</td><td>${esc(q.skills?.name_ar||'—')}</td><td>${difficultyLabel(q.difficulty)}</td><td><span class="pill ${q.status}">${statusLabel(q.status)}</span></td><td><div class="rowActions"><button data-edit="${q.id}">تعديل</button><button class="delete" data-delete="${q.id}">حذف</button></div></td></tr>`).join('');
   $('questionsEmpty').hidden=questions.length>0;
   document.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>openQuestionDialog(questions.find(q=>String(q.id)===b.dataset.edit)));
   document.querySelectorAll('[data-delete]').forEach(b=>b.onclick=()=>deleteQuestion(b.dataset.delete));
