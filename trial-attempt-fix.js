@@ -7,7 +7,7 @@
       const db=window.QudratAccess?.client;
       if(!db) throw new Error('تعذر الاتصال بحساب المستخدم');
 
-      const {data,error}=await db.rpc('claim_free_trial',{p_kind:'mock'});
+      const {data,error}=await db.rpc('claim_free_trial',{p_kind:'simulation'});
       if(error) throw error;
 
       const row=Array.isArray(data)?data[0]:data;
@@ -17,7 +17,6 @@
         return;
       }
 
-      // المحاولة أصبحت محسوبة بمجرد فتح التجربة؛ لا نخصم مرة أخرى عند الإنهاء.
       window.__QUDRAT_FREE_MOCK_CLAIMED__=true;
     }catch(e){
       console.error('free trial start claim failed',e);
