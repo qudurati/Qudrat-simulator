@@ -5,39 +5,13 @@
 .qsqrt>span{display:inline-block!important;border-top:1.7px solid currentColor!important;padding:.03em .14em 0!important;min-width:.42em}
 .qpow{display:inline-flex!important;direction:ltr!important;unicode-bidi:isolate!important;align-items:flex-start!important;vertical-align:baseline!important;white-space:nowrap!important}
 .qpow .qbase{display:inline-block!important}.qpow sup{display:inline-block!important;font-size:.62em!important;line-height:1!important;position:relative!important;top:-.52em!important;margin-left:.04em!important;vertical-align:baseline!important}
-
-/* v82: Arabic RTL unit powers — keep exponent visually after the unit (سم²) */
-.choice .qpow,#answers .qpow,.exAnswer .qpow,.explain .qpow{direction:rtl!important;display:inline-block!important;unicode-bidi:isolate!important;white-space:nowrap!important}
-.choice .qpow .qbase,#answers .qpow .qbase,.exAnswer .qpow .qbase,.explain .qpow .qbase{display:inline-block!important}
-.choice .qpow sup,#answers .qpow sup,.exAnswer .qpow sup,.explain .qpow sup{position:relative!important;top:-.55em!important;margin-right:.03em!important;margin-left:0!important;font-size:.62em!important;line-height:0!important;vertical-align:baseline!important}
-
-/* v82 global RTL math fixes */
-.qfrac{direction:ltr!important;unicode-bidi:isolate!important;vertical-align:middle!important;min-width:1.25em!important}
-.qfrac>span:first-child{border-bottom:1.7px solid currentColor!important;padding:0 .16em .08em!important}.qfrac>span:last-child{padding:.08em .16em 0!important}
-.qpow{direction:ltr!important;unicode-bidi:isolate!important;display:inline-flex!important;align-items:flex-start!important;white-space:nowrap!important;vertical-align:baseline!important}.qpow .qbase{direction:rtl!important;unicode-bidi:isolate!important}.qpow sup{direction:ltr!important;unicode-bidi:isolate!important;position:relative!important;top:-.55em!important;margin-left:.02em!important;margin-right:0!important;font-size:.62em!important}
-
-/* v90 definitive math layout: isolate every mathematical atom from page RTL */
-.qfrac,.qsqrt,.qpow{font-family:Arial,sans-serif!important;unicode-bidi:isolate!important;color:inherit!important}
-.qfrac{display:inline-grid!important;grid-template-rows:auto auto!important;direction:ltr!important;text-align:center!important;line-height:1!important;vertical-align:middle!important;min-width:1.35em!important;margin:0 .12em!important}.qfrac>span{display:block!important;direction:ltr!important}.qfrac>span:first-child{border-bottom:1.8px solid currentColor!important;padding:0 .18em .10em!important}.qfrac>span:last-child{padding:.10em .18em 0!important}
+/* v82/v90/v92 global stable math */
+.qfrac{direction:ltr!important;unicode-bidi:isolate!important;vertical-align:middle!important;min-width:1.25em!important}.qfrac>span:first-child{border-bottom:1.7px solid currentColor!important;padding:0 .16em .08em!important}.qfrac>span:last-child{padding:.08em .16em 0!important}
 .qsqrt{display:inline-flex!important;direction:ltr!important;align-items:flex-start!important;vertical-align:middle!important;position:relative!important;padding-left:.62em!important;margin:0 .08em!important}.qsqrt:before{content:'√'!important;position:absolute!important;left:0!important;bottom:0!important;font-size:1.22em!important;line-height:1!important}.qsqrt>span{display:inline-block!important;direction:ltr!important;border-top:1.8px solid currentColor!important;padding:.02em .12em 0!important;min-width:.45em!important;white-space:nowrap!important}
-.qpow{display:inline-grid!important;grid-template-columns:auto auto!important;direction:ltr!important;vertical-align:baseline!important;align-items:start!important;white-space:nowrap!important}.qpow .qbase{grid-column:1!important;direction:rtl!important;unicode-bidi:isolate!important}.qpow sup{grid-column:2!important;direction:ltr!important;unicode-bidi:isolate!important;font-size:.60em!important;line-height:1!important;position:relative!important;top:-.55em!important;margin:0 0 0 .02em!important;vertical-align:baseline!important}
-
-/* v91 exponent fix: Arabic base then exponent; no question/choice-specific overrides */
-.qpow{display:inline-flex!important;direction:rtl!important;unicode-bidi:isolate!important;align-items:flex-start!important;vertical-align:baseline!important;white-space:nowrap!important}
-.qpow .qbase{display:inline-block!important;direction:rtl!important;unicode-bidi:isolate!important;order:1!important}
-.qpow sup{display:inline-block!important;direction:rtl!important;unicode-bidi:isolate!important;order:2!important;font-size:.60em!important;line-height:1!important;position:relative!important;top:-.52em!important;margin:0 .03em 0 0!important;vertical-align:baseline!important}
-
-/* v92 hard power layout: DOM order is always BASE then EXPONENT */
-.qpow{display:inline-flex!important;direction:ltr!important;unicode-bidi:isolate!important;align-items:baseline!important;white-space:nowrap!important;vertical-align:baseline!important;gap:0!important}
-.qpow>.qbase{display:inline-block!important;direction:rtl!important;unicode-bidi:isolate!important;order:0!important}
-.qpow>.qexp{display:inline-block!important;direction:rtl!important;unicode-bidi:isolate!important;order:1!important;font-size:.60em!important;line-height:1!important;position:relative!important;top:-.72em!important;margin-left:.03em!important;margin-right:0!important}
-
-/* v93 restore the previously-correct exponent layout ONLY in choices and explanations */
-.choice .qpow,#answers .qpow,.exAnswer .qpow,.explain .qpow{direction:rtl!important;display:inline-block!important;unicode-bidi:isolate!important;white-space:nowrap!important}
-.choice .qpow>.qbase,#answers .qpow>.qbase,.exAnswer .qpow>.qbase,.explain .qpow>.qbase{display:inline-block!important;direction:rtl!important}
-.choice .qpow>.qexp,#answers .qpow>.qexp,.exAnswer .qpow>.qexp,.explain .qpow>.qexp{display:inline-block!important;direction:rtl!important;font-size:.62em!important;line-height:0!important;position:relative!important;top:-.55em!important;margin-right:.03em!important;margin-left:0!important;vertical-align:baseline!important}
-
-/* v94 question-only exponent fix: use the same proven layout as choices/explanations. */
-#questionText .qpow{direction:rtl!important;display:inline-block!important;unicode-bidi:isolate!important;white-space:nowrap!important;vertical-align:baseline!important}
-#questionText .qpow>.qbase{display:inline-block!important;direction:rtl!important;unicode-bidi:isolate!important}
-#questionText .qpow>.qexp{display:inline-block!important;direction:rtl!important;unicode-bidi:isolate!important;font-size:.62em!important;line-height:0!important;position:relative!important;top:-.55em!important;margin-right:.03em!important;margin-left:0!important;vertical-align:baseline!important}
+.qpow{display:inline-flex!important;direction:ltr!important;unicode-bidi:isolate!important;align-items:baseline!important;white-space:nowrap!important;vertical-align:baseline!important;gap:0!important}.qpow>.qbase{display:inline-block!important;direction:rtl!important;unicode-bidi:isolate!important}.qpow>.qexp{display:inline-block!important;direction:rtl!important;unicode-bidi:isolate!important;font-size:.60em!important;line-height:1!important;position:relative!important;top:-.72em!important;margin-left:.03em!important;margin-right:0!important}
+/* Correct proven RTL exponent layout in choices/explanations. */
+.choice .qpow,#answers .qpow,.exAnswer .qpow,.explain .qpow{direction:rtl!important;display:inline-block!important;unicode-bidi:isolate!important;white-space:nowrap!important}.choice .qpow>.qbase,#answers .qpow>.qbase,.exAnswer .qpow>.qbase,.explain .qpow>.qbase{display:inline-block!important;direction:rtl!important}.choice .qpow>.qexp,#answers .qpow>.qexp,.exAnswer .qpow>.qexp,.explain .qpow>.qexp{display:inline-block!important;direction:rtl!important;font-size:.62em!important;line-height:0!important;position:relative!important;top:-.55em!important;margin-right:.03em!important;margin-left:0!important;vertical-align:baseline!important}
+/* v95 QUESTION TEXT ONLY: exactly match the proven choice/explanation exponent direction. */
+#questionText .qpow,.qtext .qpow{direction:rtl!important;display:inline-block!important;unicode-bidi:isolate!important;white-space:nowrap!important;vertical-align:baseline!important}
+#questionText .qpow>.qbase,.qtext .qpow>.qbase{display:inline-block!important;direction:rtl!important;unicode-bidi:isolate!important}
+#questionText .qpow>.qexp,.qtext .qpow>.qexp{display:inline-block!important;direction:rtl!important;unicode-bidi:isolate!important;font-size:.62em!important;line-height:0!important;position:relative!important;top:-.55em!important;margin-right:.03em!important;margin-left:0!important;vertical-align:baseline!important}
