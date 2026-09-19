@@ -1,6 +1,5 @@
 (()=>{
   const card=()=>document.querySelector('#authScreen .authCard');
-  const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
   function showBox(html){
     document.body.classList.remove('authenticated');
     document.getElementById('authScreen').hidden=false;
@@ -13,47 +12,33 @@
     box.innerHTML=html;
     return box;
   }
-  async function verifyFactor(db,factorId,code){
-    const ch=await db.auth.mfa.challenge({factorId});
-    if(ch.error)throw ch.error;
-    const vr=await db.auth.mfa.verify({factorId,challengeId:ch.data.id,code});
-    if(vr.error)throw vr.error;
-    return true;
-  }
-  function codeForm(title,text,extra=''){
-    const box=showBox(`<hr style="margin:22px 0;border:0;border-top:1px solid #e5e7eb"><h2>${title}</h2><p class="muted">${text}</p>${extra}<form id="ownerMfaForm"><label>رمز التحقق<input id="ownerMfaCode" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" placeholder="000000" required></label><button class="primary wide" type="submit">تحقق ودخول</button></form><p class="formMessage" id="ownerMfaMessage" role="status"></p><button class="textButton" id="ownerMfaLogout" type="button">إلغاء وتسجيل الخروج</button>`);
-    return box;
-  }
   window.requireOwnerMfa=async(db,session)=>{
     try{
-      const aal=await db.auth.mfa.getAuthenticatorAssuranceLevel();
-      if(aal.error)throw aal.error;
-      if(aal.data?.currentLevel==='aal2')return true;
-      const listed=await db.auth.mfa.listFactors();
-      if(listed.error)throw listed.error;
-      let factor=(listed.data?.totp||[]).find(f=>f.status==='verified');
-      let enrolling=false,qr='',secret='';
-      if(!factor){
-        enrolling=true;
-        for(const stale of (listed.data?.totp||[]).filter(f=>f.status!=='verified')) await db.auth.mfa.unenroll({factorId:stale.id});
-        const en=await db.auth.mfa.enroll({factorType:'totp',friendlyName:'Qudrati Owner'});
-        if(en.error)throw en.error;
-        factor=en.data;qr=en.data?.totp?.qr_code||'';secret=en.data?.totp?.secret||'';
-      }
-      const extra=enrolling?`<div style="text-align:center;margin:16px 0"><p><b>أول مرة فقط:</b> افتح تطبيق المصادقة مثل Google Authenticator أو Microsoft Authenticator ثم امسح الرمز.</p>${qr?`<img src="${esc(qr)}" alt="QR للمصادقة" style="width:210px;max-width:80%;background:white;padding:8px;border-radius:12px">`:''}${secret?`<p style="word-break:break-all"><small>أو أدخل المفتاح يدويًا:</small><br><code dir="ltr">${esc(secret)}</code></p>`:''}</div>`:'';
-      const box=codeForm(enrolling?'تفعيل التحقق بخطوتين':'التحقق بخطوتين',enrolling?'اربط تطبيق المصادقة ثم أدخل الرمز المكوّن من 6 أرقام.':'أدخل الرمز المكوّن من 6 أرقام من تطبيق المصادقة.',extra);
+      const email=session?.user?.email;
+      if(!email)throw new Error('Missing owner email');
+      const box=showBox(`<hr style="margin:22px 0;border:0;border-top:1px solid #e5e7eb"><h2>رمز التحقق عبر البريد</h2><p class="muted">سنرسل رمز تحقق إلى بريد المالك <b dir="ltr">${email}</b>.</p><button class="primary wide" id="ownerSendEmailCode" type="button">إرسال رمز التحقق</button><form id="ownerEmailCodeForm" hidden><label>رمز التحقق<input id="ownerEmailCode" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6,8}" maxlength="8" placeholder="أدخل الرمز" required></label><button class="primary wide" type="submit">تحقق ودخول</button></form><p class="formMessage" id="ownerMfaMessage" role="status"></p><button class="textButton" id="ownerMfaLogout" type="button">إلغاء وتسجيل الخروج</button>`);
+      const msg=box.querySelector('#ownerMfaMessage');
+      const sendBtn=box.querySelector('#ownerSendEmailCode');
+      const form=box.querySelector('#ownerEmailCodeForm');
       box.querySelector('#ownerMfaLogout').onclick=async()=>{await db.auth.signOut();location.reload()};
+      sendBtn.onclick=async()=>{
+        msg.textContent='جارٍ إرسال الرمز...';sendBtn.disabled=true;
+        const {error}=await db.auth.signInWithOtp({email,options:{shouldCreateUser:false}});
+        if(error){msg.textContent='تعذر إرسال الرمز إلى البريد. حاول مرة أخرى.';sendBtn.disabled=false;return}
+        msg.textContent='تم إرسال الرمز إلى بريدك.';form.hidden=false;sendBtn.textContent='إعادة إرسال الرمز';sendBtn.disabled=false;box.querySelector('#ownerEmailCode').focus();
+      };
       return await new Promise(resolve=>{
-        box.querySelector('#ownerMfaForm').onsubmit=async e=>{
-          e.preventDefault();const msg=box.querySelector('#ownerMfaMessage'),btn=e.submitter,code=box.querySelector('#ownerMfaCode').value.trim();
+        form.onsubmit=async e=>{
+          e.preventDefault();const btn=e.submitter,token=box.querySelector('#ownerEmailCode').value.trim();
           msg.textContent='جارٍ التحقق...';btn.disabled=true;
-          try{await verifyFactor(db,factor.id,code);msg.textContent='تم التحقق بنجاح.';resolve(true)}
-          catch(err){msg.textContent='الرمز غير صحيح أو انتهت صلاحيته. حاول مرة أخرى.';btn.disabled=false;box.querySelector('#ownerMfaCode').select()}
+          const {data,error}=await db.auth.verifyOtp({email,token,type:'email'});
+          if(error||!data?.session){msg.textContent='الرمز غير صحيح أو انتهت صلاحيته.';btn.disabled=false;box.querySelector('#ownerEmailCode').select();return}
+          msg.textContent='تم التحقق بنجاح.';resolve(true);
         };
       });
     }catch(err){
-      console.error('Owner MFA error',err);
-      const box=showBox('<h2>تعذر تشغيل التحقق بخطوتين</h2><p class="formMessage">تعذر إعداد حماية لوحة المالك. سجّل الخروج ثم حاول مرة أخرى.</p><button class="textButton" id="ownerMfaLogout" type="button">تسجيل الخروج</button>');
+      console.error('Owner email verification error',err);
+      const box=showBox('<h2>تعذر تشغيل التحقق عبر البريد</h2><p class="formMessage">سجّل الخروج ثم حاول مرة أخرى.</p><button class="textButton" id="ownerMfaLogout" type="button">تسجيل الخروج</button>');
       box.querySelector('#ownerMfaLogout').onclick=async()=>{await db.auth.signOut();location.reload()};
       return false;
     }
