@@ -19,3 +19,6 @@ renderAdminMath=function(raw){
   holds.forEach(([k,h])=>{s=s.split(k).join(h)});
   return s;
 };
+
+// Load the owner-only question-bank API bridge after the legacy admin code.
+(()=>{const s=document.createElement('script');s.src='admin-secure-questions.js?v=20260919-1';s.onload=()=>{if(document.body.classList.contains('authenticated')){loadSkills();loadQuestions();}};document.head.appendChild(s)})();
