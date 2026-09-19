@@ -71,6 +71,10 @@ async function createFirstAccount(){
 async function enterDashboard(session){
   const {data,error}=await db.rpc('owner_dashboard_summary');
   if(error||!data){await db.auth.signOut();showAuth();return setMessage('authMessage','هذا الحساب غير مخوّل للدخول إلى لوحة المالك.');}
+  if(typeof window.requireOwnerMfa==='function'){
+    const verified=await window.requireOwnerMfa(db,session);
+    if(!verified)return;
+  }
   document.body.classList.add('authenticated');$('authScreen').hidden=true;$('app').hidden=false;$('ownerEmail').textContent=session.user.email||'حساب المالك';
   paintSummary(data);
   await Promise.all([loadSkills(),loadQuestions(),loadResults()]);
