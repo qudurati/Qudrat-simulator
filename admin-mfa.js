@@ -1,6 +1,6 @@
 (()=>{
   const MFA_KEY='qudrat_owner_mfa_verified_at';
-  const MFA_GRACE_MS=30*60*1000;
+  const MFA_GRACE_MS=60*60*1000;
   const card=()=>document.querySelector('#authScreen .authCard');
   function showBox(html){
     document.body.classList.remove('authenticated');
