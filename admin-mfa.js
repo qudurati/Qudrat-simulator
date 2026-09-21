@@ -19,6 +19,12 @@
     box.innerHTML=html;
     return box;
   }
+  const sendErrorText=error=>{
+    const message=String(error?.message||'خطأ غير معروف');
+    const code=error?.code?` — ${error.code}`:'';
+    const status=error?.status?` — HTTP ${error.status}`:'';
+    return `تعذر إرسال الرمز: ${message}${code}${status}`;
+  };
   window.requireOwnerMfa=async(db,session)=>{
     try{
       const email=session?.user?.email;
@@ -39,7 +45,11 @@
         sending=true;msg.textContent='جارٍ إرسال الرمز...';resendBtn.disabled=true;
         const {error}=await db.auth.signInWithOtp({email,options:{shouldCreateUser:false}});
         sending=false;
-        if(error){console.error('Owner OTP send error',error);msg.textContent='تعذر إرسال الرمز إلى البريد. حاول مرة أخرى.';resendBtn.hidden=false;resendBtn.disabled=false;return false}
+        if(error){
+          console.error('Owner OTP send error',error);
+          msg.textContent=sendErrorText(error);
+          resendBtn.hidden=false;resendBtn.disabled=false;return false;
+        }
         attempts=0;codeInput.disabled=false;form.querySelector('button[type="submit"]').disabled=false;
         msg.textContent='تم إرسال الرمز. استخدم أحدث رسالة وصلتك؛ أي رمز أقدم لن يعمل.';form.hidden=false;resendBtn.hidden=false;resendBtn.disabled=false;codeInput.value='';codeInput.focus();return true;
       };
