@@ -1,4 +1,4 @@
-// Qudrat unified math renderer v81 — fractions, roots and powers.
+// Qudrat unified math renderer v82 — fractions, roots and powers.
 (function(){
  const AR='٠١٢٣٤٥٦٧٨٩', FA='۰۱۲۳۴۵۶۷۸۹';
  const ar=s=>String(s??'').replace(/[0-9۰-۹]/g,d=>/[0-9]/.test(d)?AR[d]:AR[FA.indexOf(d)]);
@@ -23,9 +23,9 @@
   s=s.replace(/√\s*[（(]\s*([^()（）]{1,50}?)\s*[)）]/g,(_,x)=>hold(sqrt(x)))
    .replace(/√\s*([0-9٠-٩۰-۹]+(?:[.,٫][0-9٠-٩۰-۹]+)?)/g,(_,x)=>hold(sqrt(x)))
    .replace(/√\s*([A-Za-z\u0600-\u06FF](?:\s*[+\-−×÷]\s*[A-Za-z0-9٠-٩۰-۹\u0600-\u06FF]+)?)/g,(_,x)=>hold(sqrt(x)));
-  // Keep ordinary parenthesized subtraction on one baseline in RTL text, e.g. (ن − ٢).
-  // This is intentionally NOT a power rule and does not touch expressions containing ^ or superscript digits.
-  s=s.replace(/([（(])\s*([A-Za-z\u0600-\u06FF]+)\s*([\-−])\s*([0-9٠-٩۰-۹]+)\s*([)）])/g,(_,o,a,op,b,c)=>hold(`<span dir="ltr" style="display:inline-block;unicode-bidi:isolate;white-space:nowrap">${esc(o)}${esc(ar(a))} ${esc(op)} ${esc(ar(b))}${esc(c)}</span>`));
+  // Ordinary subtraction only: isolate the Arabic variable and force every glyph onto one baseline.
+  // No power syntax (^ or superscript digits) is matched here.
+  s=s.replace(/([（(])\s*([A-Za-z\u0600-\u06FF]+)\s*([\-−])\s*([0-9٠-٩۰-۹]+)\s*([)）])/g,(_,o,a,op,b,c)=>hold(`<span dir="ltr" style="display:inline-flex;align-items:baseline;vertical-align:baseline;unicode-bidi:isolate;white-space:nowrap;line-height:1"><span style="display:inline-block;vertical-align:baseline;line-height:1">${esc(o)}</span><span dir="rtl" style="display:inline-block;vertical-align:baseline;line-height:1;position:relative;top:0">${esc(ar(a))}</span><span style="display:inline-block;vertical-align:baseline;line-height:1;margin:0 .18em">${esc(op)}</span><span style="display:inline-block;vertical-align:baseline;line-height:1">${esc(ar(b))}</span><span style="display:inline-block;vertical-align:baseline;line-height:1">${esc(c)}</span></span>`));
   s=s.replace(/([0-9٠-٩۰-۹]+)\s*\^\s*([0-9٠-٩۰-۹]+)\s*([+\-−×÷])\s*([0-9٠-٩۰-۹]+)\s*\^\s*([0-9٠-٩۰-۹]+)/g,
     (_,a,b,op,d,e)=>hold(expr([pow(a,b),`<span class="qop">${esc(op)}</span>`,pow(d,e)])))
    .replace(/([0-9٠-٩۰-۹]+)([⁰¹²³⁴⁵⁶⁷⁸⁹]+)\s*([+\-−×÷])\s*([0-9٠-٩۰-۹]+)([⁰¹²³⁴⁵⁶⁷⁸⁹]+)/g,
