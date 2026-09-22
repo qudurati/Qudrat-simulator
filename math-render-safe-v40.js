@@ -1,4 +1,4 @@
-// Qudrat unified math renderer v80 — fractions, roots and powers.
+// Qudrat unified math renderer v81 — fractions, roots and powers.
 (function(){
  const AR='٠١٢٣٤٥٦٧٨٩', FA='۰۱۲۳۴۵۶۷۸۹';
  const ar=s=>String(s??'').replace(/[0-9۰-۹]/g,d=>/[0-9]/.test(d)?AR[d]:AR[FA.indexOf(d)]);
@@ -12,40 +12,32 @@
  function pow(a,b){return `<span class="qpow" dir="ltr"><span class="qbase">${esc(ar(a))}</span><span class="qexp">${esc(ar(b))}</span></span>`}
  function render(raw){
   let s=String(raw??''),holds=[],n=0;
-  // Never expose internal legacy placeholders to students. They were accidentally persisted in some bank rows.
-  // If a legacy token is present, remove it cleanly; valid raw math around it remains renderable.
   s=s.replace(/QQMATHHOLD[^Z\n<]{0,24}ZZ/gi,'');
   const hold=h=>{const key=`\uE000${String.fromCharCode(0xE100+(n++))}\uE001`;holds.push([key,h]);return key};
-  // 1) Explicit canonical tokens first.
   s=s.replace(/\{\{\s*chart\s*:\s*bar\s*:\s*([^}]+)\}\}/gi,(_,x)=>hold(chart(x)))
    .replace(/\{\{shape:(triangle|rect|rectangle|circle|square)(?::([^}]+))?\}\}/gi,(_,t,a)=>hold(svg(t.toLowerCase(),a?a.split(':'):[])))
    .replace(/QVISUALTOKEN\s*[·.،,:-]*\s*(triangle|rect|rectangle|circle|square)?/gi,(_,t)=>hold(svg((t||'rect').toLowerCase(),[])))
    .replace(/\{\{frac:([^}:]+):([^}]+)\}\}/gi,(_,a,b)=>hold(frac(a,b)))
    .replace(/\{\{sqrt:([^}]+)\}\}/gi,(_,x)=>hold(sqrt(x)))
    .replace(/\{\{pow:([^}:]+):([^}]+)\}\}/gi,(_,a,b)=>hold(pow(a,b)));
-  // 2) Normalize legacy square-root forms. The radicand is isolated from RTL text.
   s=s.replace(/√\s*[（(]\s*([^()（）]{1,50}?)\s*[)）]/g,(_,x)=>hold(sqrt(x)))
    .replace(/√\s*([0-9٠-٩۰-۹]+(?:[.,٫][0-9٠-٩۰-۹]+)?)/g,(_,x)=>hold(sqrt(x)))
    .replace(/√\s*([A-Za-z\u0600-\u06FF](?:\s*[+\-−×÷]\s*[A-Za-z0-9٠-٩۰-۹\u0600-\u06FF]+)?)/g,(_,x)=>hold(sqrt(x)));
-  // Protect complete powered expressions before individual powers, e.g. ٥^٢ − ٣^٢.
-  // This prevents RTL from reversing the order of the two powered terms around the operator.
+  // Keep ordinary parenthesized subtraction on one baseline in RTL text, e.g. (ن − ٢).
+  // This is intentionally NOT a power rule and does not touch expressions containing ^ or superscript digits.
+  s=s.replace(/([（(])\s*([A-Za-z\u0600-\u06FF]+)\s*([\-−])\s*([0-9٠-٩۰-۹]+)\s*([)）])/g,(_,o,a,op,b,c)=>hold(`<span dir="ltr" style="display:inline-block;unicode-bidi:isolate;white-space:nowrap">${esc(o)}${esc(ar(a))} ${esc(op)} ${esc(ar(b))}${esc(c)}</span>`));
   s=s.replace(/([0-9٠-٩۰-۹]+)\s*\^\s*([0-9٠-٩۰-۹]+)\s*([+\-−×÷])\s*([0-9٠-٩۰-۹]+)\s*\^\s*([0-9٠-٩۰-۹]+)/g,
     (_,a,b,op,d,e)=>hold(expr([pow(a,b),`<span class="qop">${esc(op)}</span>`,pow(d,e)])))
    .replace(/([0-9٠-٩۰-۹]+)([⁰¹²³⁴⁵⁶⁷⁸⁹]+)\s*([+\-−×÷])\s*([0-9٠-٩۰-۹]+)([⁰¹²³⁴⁵⁶⁷⁸⁹]+)/g,
     (_,a,b,op,d,e)=>{const m={'⁰':'٠','¹':'١','²':'٢','³':'٣','⁴':'٤','⁵':'٥','⁶':'٦','⁷':'٧','⁸':'٨','⁹':'٩'};const cv=x=>[...x].map(z=>m[z]||z).join('');return hold(expr([pow(a,cv(b)),`<span class="qop">${esc(op)}</span>`,pow(d,cv(e))]))});
-  // Canonical database form: ٦٤^(س-١), ٩^(س−١), etc. Protect the whole power before RTL can reorder it.
   s=s.replace(/([A-Za-z\u0600-\u06FF0-9٠-٩۰-۹]+)\s*\^\s*[（(]\s*([^()（）]{1,40})\s*[)）]/g,(_,a,b)=>hold(pow(a,b)));
-  // 3) Normalize powers. Catch legacy Arabic forms, including a bare exponent after a numeric base (٦٣ meaning ٦^٣ when the exponent is visually separated in source markup).
-  // First protect explicit base/exponent pairs separated by whitespace: "٦ ٣ × ٦ ٤".
   s=s.replace(/([0-9٠-٩۰-۹]+)\s+([٢٣٤٥٦٧٨٩2-9])(?=\s*(?:[×*÷+=]))/g,(_,a,b)=>hold(pow(a,b)))
    .replace(/([（(][^()（）]{1,40}[)）])\s*([٢٣23])(?=\s*(?:[=،,.؟?]|$))/g,(_,a,b)=>hold(pow(a,b)))
    .replace(/(سم|كم|مم|م)\s*[\^]\s*([0-9٠-٩۰-۹]+)/g,(_,a,b)=>hold(pow(a,b)))
    .replace(/(سم|كم|مم|م)([²³])/g,(_,a,b)=>hold(pow(a,b==='²'?'٢':'٣')))
    .replace(/([A-Za-z\u0600-\u06FF0-9٠-٩۰-۹]+|[（(][^()（）]{1,30}[)）])\s*[\^]\s*[（(]?\s*([+\-−]?[0-9٠-٩۰-۹]+)\s*[)）]?/g,(_,a,b)=>hold(pow(a,b)))
    .replace(/([A-Za-z\u0600-\u06FF0-9٠-٩۰-۹]+|[（(][^()（）]{1,30}[)）])([⁰¹²³⁴⁵⁶⁷⁸⁹]+)/g,(_,a,b)=>{const m={'⁰':'٠','¹':'١','²':'٢','³':'٣','⁴':'٤','⁵':'٥','⁶':'٦','⁷':'٧','⁸':'٨','⁹':'٩'};return hold(pow(a,[...b].map(x=>m[x]||x).join('')))});
-  // 4) Normalize every standalone numeric slash fraction, including Arabic-Indic digits.
   s=s.replace(/([0-9٠-٩۰-۹]+)\s*[\/⁄]\s*([0-9٠-٩۰-۹]+)/g,(_,a,b)=>hold(frac(a,b)));
-  // Escape ordinary text, convert digits, then restore protected math HTML.
   s=ar(esc(s));holds.forEach(([k,h])=>{s=s.split(k).join(h)});return s
  }
  window.QudratMath={render,ar};
