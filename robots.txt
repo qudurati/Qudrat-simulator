@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+Disallow: /admin.html
+Disallow: /admin-question-preview.html
+Disallow: /refund-request.html
+
+Sitemap: https://qudrati.com.sa/sitemap.xml
