@@ -16,7 +16,8 @@ window.SUPABASE_PUBLISHABLE_KEY='sb_publishable_k7EwSBL9UTaVL_Zz_oB0Mg_oRXKcQvH'
           autoRefreshToken:true,
           detectSessionInUrl:true,
           storage:window.localStorage,
-          storageKey:storageKey
+          storageKey:storageKey,
+          experimental:{passkey:true}
         }
       });
     }
