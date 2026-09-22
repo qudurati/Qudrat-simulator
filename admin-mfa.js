@@ -83,3 +83,69 @@
     }
   };
 })();
+
+(()=>{
+  const MFA_KEY='qudrat_owner_mfa_verified_at';
+  const ready=()=>window.supabase&&window.SUPABASE_URL&&window.SUPABASE_PUBLISHABLE_KEY;
+  const passkeyClient=()=>supabase.createClient(window.SUPABASE_URL,window.SUPABASE_PUBLISHABLE_KEY,{auth:{experimental:{passkey:true}}});
+  const friendlyError=err=>{
+    const code=String(err?.code||'');
+    if(code==='passkey_disabled')return 'مفتاح المرور غير مفعّل في إعدادات Supabase بعد.';
+    if(code==='webauthn_credential_exists')return 'مفتاح المرور مسجل على هذا الجهاز مسبقًا.';
+    if(code==='webauthn_credential_not_found')return 'لا يوجد مفتاح مرور مسجل لهذا الجهاز.';
+    if(code==='webauthn_verification_failed')return 'تعذر التحقق من Face ID أو مفتاح المرور.';
+    if(String(err?.name||'')==='NotAllowedError')return 'تم إلغاء Face ID أو انتهت مهلة التحقق.';
+    return String(err?.message||'تعذر استخدام مفتاح المرور.');
+  };
+  function addLoginButton(){
+    const form=document.getElementById('loginForm');
+    if(!form||document.getElementById('ownerPasskeyLogin'))return;
+    const btn=document.createElement('button');
+    btn.id='ownerPasskeyLogin';btn.type='button';btn.className='primary wide';
+    btn.style.cssText='margin-top:12px;background:#0f766e';
+    btn.textContent='الدخول بـ Face ID / مفتاح المرور';
+    form.insertAdjacentElement('afterend',btn);
+    btn.onclick=async()=>{
+      const msg=document.getElementById('authMessage');
+      if(!ready()){msg.textContent='تعذر تهيئة تسجيل الدخول.';return}
+      btn.disabled=true;msg.textContent='افتح Face ID للتحقق...';
+      try{
+        const client=passkeyClient();
+        const {data,error}=await client.auth.signInWithPasskey();
+        if(error)throw error;
+        if(!data?.session)throw new Error('لم يتم إنشاء جلسة دخول.');
+        const {data:allowed,error:ownerError}=await client.rpc('owner_dashboard_summary');
+        if(ownerError||!allowed){await client.auth.signOut();throw new Error('هذا الحساب غير مخوّل للدخول إلى لوحة المالك.');}
+        sessionStorage.setItem(MFA_KEY,String(Date.now()));
+        location.reload();
+      }catch(err){console.error('Owner passkey login error',err);msg.textContent=friendlyError(err);btn.disabled=false}
+    };
+  }
+  function addEnrollButton(){
+    const app=document.getElementById('app');
+    if(!app||app.hidden||document.getElementById('ownerPasskeyEnroll'))return;
+    const badge=document.querySelector('.ownerBadge');
+    if(!badge)return;
+    const btn=document.createElement('button');
+    btn.id='ownerPasskeyEnroll';btn.type='button';
+    btn.style.cssText='border:1px solid #cbd5e1;background:#fff;border-radius:10px;padding:8px 11px;font-weight:800;cursor:pointer;margin-inline-start:8px';
+    btn.textContent='تفعيل Face ID';badge.insertAdjacentElement('afterend',btn);
+    btn.onclick=async()=>{
+      btn.disabled=true;const old=btn.textContent;btn.textContent='جارٍ التفعيل...';
+      try{
+        const client=passkeyClient();
+        const {data,error}=await client.auth.registerPasskey();
+        if(error)throw error;
+        btn.textContent='✓ تم تفعيل Face ID';btn.disabled=true;
+        alert('تم تسجيل مفتاح المرور بنجاح. في المرة القادمة يمكنك الدخول مباشرة باستخدام Face ID.');
+      }catch(err){console.error('Owner passkey registration error',err);alert(friendlyError(err));btn.disabled=false;btn.textContent=old}
+    };
+  }
+  function initPasskeys(){
+    if(!window.PublicKeyCredential)return;
+    addLoginButton();addEnrollButton();
+    const app=document.getElementById('app');
+    if(app)new MutationObserver(()=>addEnrollButton()).observe(app,{attributes:true,attributeFilter:['hidden']});
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initPasskeys);else initPasskeys();
+})();
