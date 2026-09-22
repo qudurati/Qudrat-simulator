@@ -1,25 +1,21 @@
-// Qudrat unified math renderer v85 — fractions, roots and powers.
+// Qudrat unified math renderer v86 — fractions, roots and powers.
 (function(){
  const AR='٠١٢٣٤٥٦٧٨٩', FA='۰۱۲۳۴۵۶۷۸۹';
  const ar=s=>String(s??'').replace(/[0-9۰-۹]/g,d=>/[0-9]/.test(d)?AR[d]:AR[FA.indexOf(d)]);
- const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
  const label=(x,y,t)=>`<text x="${x}" y="${y}" text-anchor="middle" class="qlabel">${esc(ar(t))}</text>`;
  function svg(type,a=[]){if(type==='triangle')return `<div class="qvisual"><svg viewBox="0 0 300 190"><polygon points="150,20 45,155 255,155" class="qstroke"/>${label(70,95,a[0]||'')}${label(150,180,a[1]||'')}${label(230,95,a[2]||'')}</svg></div>`;if(type==='rect'||type==='rectangle')return `<div class="qvisual"><svg viewBox="0 0 300 190"><rect x="45" y="30" width="210" height="120" class="qstroke"/>${label(150,180,a[0]||'')}${label(24,95,a[1]||'')}</svg></div>`;if(type==='square')return `<div class="qvisual"><svg viewBox="0 0 300 190"><rect x="70" y="15" width="160" height="160" class="qstroke"/>${label(150,188,a[0]||'')}</svg></div>`;if(type==='circle')return `<div class="qvisual"><svg viewBox="0 0 300 190"><circle cx="150" cy="92" r="70" class="qstroke"/><circle cx="150" cy="92" r="3" class="qfill"/><line x1="150" y1="92" x2="220" y2="92" class="qstroke"/>${label(185,80,a[0]||'')}</svg></div>`;return''}
  function chart(spec){const z=String(spec).split(',').map(x=>x.split('=')),vals=z.map(x=>Number(String(x[1]||'').replace(/[٠-٩]/g,d=>AR.indexOf(d)))||0),m=Math.max(1,...vals);return `<div class="qchart">${z.map(([k,v],i)=>`<div class="qbarRow"><span>${esc(k||'')}</span><i style="--w:${vals[i]/m*100}%"></i><b>${ar(v||'')}</b></div>`).join('')}</div>`}
  function frac(a,b){return `<span class="qfrac" dir="ltr"><span>${esc(ar(a))}</span><span>${esc(ar(b))}</span></span>`}
  function pow(a,b){return `<span class="qpow" dir="ltr"><span class="qbase">${esc(ar(a))}</span><span class="qexp">${esc(ar(b))}</span></span>`}
  function rootInner(x){
-  let s=String(x??'').trim(),out='',last=0;
+  const s=String(x??'').trim();
   const sup={'⁰':'٠','¹':'١','²':'٢','³':'٣','⁴':'٤','⁵':'٥','⁶':'٦','⁷':'٧','⁸':'٨','⁹':'٩'};
-  const re=/([0-9٠-٩۰-۹]+)(?:\s*\^\s*([0-9٠-٩۰-۹]+)|([⁰¹²³⁴⁵⁶⁷⁸⁹]+))/g;
-  let m;
-  while((m=re.exec(s))){
-   out+=esc(ar(s.slice(last,m.index)));
-   const e=m[2]||[...(m[3]||'')].map(z=>sup[z]||z).join('');
-   out+=pow(m[1],e);last=re.lastIndex;
-  }
-  out+=esc(ar(s.slice(last)));
-  return `<span class="qrootexpr" dir="ltr" style="display:inline-flex;direction:ltr;unicode-bidi:isolate;align-items:baseline;gap:.10em;white-space:nowrap">${out}</span>`
+  const cv=e=>[...String(e||'')].map(z=>sup[z]||z).join('');
+  const term=t=>{const v=String(t||'').trim();const m=v.match(/^([0-9٠-٩۰-۹]+)(?:\s*\^\s*([0-9٠-٩۰-۹]+)|([⁰¹²³⁴⁵⁶⁷⁸⁹]+))$/);return m?pow(m[1],m[2]||cv(m[3])):`<span dir="ltr" style="unicode-bidi:isolate">${esc(ar(v))}</span>`};
+  const parts=s.split(/\s*([+\-−×÷])\s*/).filter(v=>v!=='');
+  const nodes=parts.map((p,i)=>i%2?`<span class="qop" dir="ltr" style="unicode-bidi:isolate;margin:0 .10em">${esc(p)}</span>`:term(p));
+  return `<span class="qrootexpr" dir="ltr" style="display:inline-flex;flex-direction:row;direction:ltr;unicode-bidi:isolate;align-items:baseline;white-space:nowrap">${nodes.join('')}</span>`
  }
  function sqrt(x){return `<bdi dir="ltr" class="qmath-isolate"><span class="qsqrt"><span>${rootInner(x)}</span></span></bdi>`}
  function expr(items){return `<bdi dir="ltr" class="qmath-isolate"><span class="qexpr" dir="ltr" style="display:inline-flex;align-items:baseline;gap:.14em;unicode-bidi:isolate;white-space:nowrap">${items.join('')}</span></bdi>`}
