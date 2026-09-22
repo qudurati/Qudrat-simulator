@@ -15,3 +15,9 @@
 #questionText .qpow,.qtext .qpow{direction:rtl!important;display:inline-block!important;unicode-bidi:isolate!important;white-space:nowrap!important;vertical-align:baseline!important}
 #questionText .qpow>.qbase,.qtext .qpow>.qbase{display:inline-block!important;direction:rtl!important;unicode-bidi:isolate!important}
 #questionText .qpow>.qexp,.qtext .qpow>.qexp{display:inline-block!important;direction:rtl!important;unicode-bidi:isolate!important;font-size:.62em!important;line-height:0!important;position:relative!important;top:-.55em!important;margin-right:.03em!important;margin-left:0!important;vertical-align:baseline!important}
+/* v99 ROOT CONTENT: root expressions are mathematical LTR sequences; override explanation/question RTL exponent rules only inside roots. */
+.qsqrt .qrootexpr{display:inline-flex!important;flex-direction:row!important;direction:ltr!important;unicode-bidi:isolate!important;align-items:baseline!important;white-space:nowrap!important}
+.qsqrt .qrootexpr .qpow{display:inline-flex!important;flex-direction:row!important;direction:ltr!important;unicode-bidi:isolate!important;align-items:baseline!important;vertical-align:baseline!important}
+.qsqrt .qrootexpr .qpow>.qbase{display:inline-block!important;direction:ltr!important;unicode-bidi:isolate!important}
+.qsqrt .qrootexpr .qpow>.qexp{display:inline-block!important;direction:ltr!important;unicode-bidi:isolate!important;font-size:.60em!important;line-height:1!important;position:relative!important;top:-.72em!important;margin-left:.03em!important;margin-right:0!important;vertical-align:baseline!important}
+.qsqrt .qrootexpr .qop{display:inline-block!important;direction:ltr!important;unicode-bidi:isolate!important}
