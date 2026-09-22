@@ -12,3 +12,11 @@
 .qsqrt-rtl .qrootexpr .qpow>.qbase{display:inline-block!important;direction:rtl!important;unicode-bidi:isolate!important}
 .qsqrt-rtl .qrootexpr .qpow>.qexp{display:inline-block!important;direction:rtl!important;unicode-bidi:isolate!important;font-size:.60em!important;line-height:1!important;position:relative!important;top:-.72em!important;margin-right:.03em!important;margin-left:0!important;vertical-align:baseline!important}
 .qsqrt-rtl .qrootop,.qsqrt-rtl .qrootterm{display:inline-block!important;direction:rtl!important;unicode-bidi:isolate!important;margin:0 .08em!important}
+/* Results page only: match question powers to the correct RTL question rendering. */
+.reviewQ .qpow{direction:rtl!important;display:inline-block!important;unicode-bidi:isolate!important;white-space:nowrap!important}
+.reviewQ .qpow>.qbase{display:inline-block!important;direction:rtl!important;unicode-bidi:isolate!important}
+.reviewQ .qpow>.qexp{display:inline-block!important;direction:rtl!important;unicode-bidi:isolate!important;font-size:.62em!important;line-height:0!important;position:relative!important;top:-.55em!important;margin-right:.03em!important;margin-left:0!important;vertical-align:baseline!important}
+/* Results page: promote the existing dashboard action to a compact home button at the top. */
+.result .actions a[href="dashboard.html"]{position:fixed!important;top:12px!important;right:12px!important;z-index:1000!important;width:44px!important;height:44px!important;padding:0!important;border-radius:12px!important;background:#fff!important;color:#1769c2!important;border:1px solid #ccd6e2!important;box-shadow:0 4px 14px rgba(25,65,110,.14)!important;font-size:0!important;display:grid!important;place-items:center!important}
+.result .actions a[href="dashboard.html"]:before{content:'⌂'!important;font-size:28px!important;line-height:1!important;font-weight:900!important}
+@media print{.result .actions a[href="dashboard.html"]{display:none!important}}
