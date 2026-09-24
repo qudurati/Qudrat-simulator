@@ -1,3 +1,4 @@
+@import url('admin-notifications-ui-v1.css?v=1');
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap');
 :root{--navy:#172033;--blue:#2563eb;--bg:#f3f5f9;--line:#e2e7ef;--text:#1d2939;--muted:#667085;--white:#fff;--danger:#d92d20}
 *{box-sizing:border-box}[hidden]{display:none!important}body{margin:0;background:var(--bg);color:var(--text);font-family:'Tajawal',Arial,sans-serif}body:not(.authenticated) #app{display:none!important}body.authenticated #authScreen{display:none!important}button,input,select,textarea{font:inherit}button{cursor:pointer}.muted{color:var(--muted)}
