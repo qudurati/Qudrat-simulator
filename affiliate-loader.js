@@ -1,0 +1,1 @@
+(()=>{const s=document.createElement('script');s.src='affiliate-tracking.js?v=20260925-1';document.head.appendChild(s)})();
