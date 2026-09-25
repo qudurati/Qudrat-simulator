@@ -24,7 +24,6 @@ renderAdminMath=function(raw){
   style.textContent=`#resultsView table{min-width:900px}#resultsView th{white-space:nowrap}#resultsView td{vertical-align:middle}@media(max-width:760px){#resultsView .tableWrap{overflow:visible}#resultsView table,#resultsView tbody,#resultsView tr,#resultsView td{display:block;width:100%;min-width:0}#resultsView thead{display:none}#resultsView tr{background:#fff;border:1px solid #e2e7ef;border-radius:14px;padding:8px 13px;margin-bottom:12px;box-shadow:0 2px 8px rgba(23,32,51,.04)}#resultsView td{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:9px 2px;border-bottom:1px solid #edf0f4;text-align:left}#resultsView td:last-child{border-bottom:0}#resultsView td:before{content:attr(data-label);font-weight:800;color:#667085;text-align:right}#resultsView td:first-child b{color:#17345f}}`;
   document.head.appendChild(style);
   function ensureHead(){const table=document.querySelector('#resultsView table');if(!table)return;if(!table.tHead){const h=table.createTHead(),r=h.insertRow();['اسم الطالب','التاريخ','الاختبار / التدريب','الإجمالي','الكمي','اللفظي','الحالة'].forEach(x=>{const th=document.createElement('th');th.textContent=x;r.appendChild(th)})}}
-  const oldLoad=window.loadResults;
   window.loadResults=async function(){
     ensureHead();
     const [attemptRes,studentRes]=await Promise.all([db.from('exam_attempts').select('*').order('started_at',{ascending:false}).limit(100),db.rpc('admin_list_students')]);
@@ -45,4 +44,4 @@ renderAdminMath=function(raw){
 (()=>{function addPreviewLinks(){const nav=document.querySelector('.sidebar nav');if(nav&&!nav.querySelector('[data-question-preview]')){const a=document.createElement('a');a.className='navItem';a.href='admin-question-preview.html';a.dataset.questionPreview='1';a.style.textDecoration='none';a.textContent='معاينة جميع الأسئلة';const q=[...nav.children].find(x=>x.textContent.includes('بنك الأسئلة'));q?q.after(a):nav.appendChild(a)}const home=document.querySelector('.ownerHome');if(home&&!home.querySelector('[data-question-preview]')){const a=document.createElement('a');a.className='ownerTile';a.href='admin-question-preview.html';a.dataset.questionPreview='1';a.innerHTML='<span class="tileIcon">👁️</span><span><b>معاينة جميع الأسئلة</b><small>السؤال والخيارات والإجابة الصحيحة والشرح كما تظهر للطالب</small></span>';home.appendChild(a)}}document.addEventListener('DOMContentLoaded',addPreviewLinks);setTimeout(addPreviewLinks,500)})();
 
 // Load affiliate marketers management module.
-(()=>{const s=document.createElement('script');s.src='admin-affiliates.js?v=20260925-4';document.head.appendChild(s)})();
+(()=>{const s=document.createElement('script');s.src='admin-affiliates.js?v=20260925-5';document.head.appendChild(s)})();
