@@ -1,1 +1,1 @@
-(()=>{const s=document.createElement('script');s.src='affiliate-tracking.js?v=20260925-1';document.head.appendChild(s)})();
+(()=>{const s=document.createElement('script');s.src='affiliate-tracking.js?v=20260925-2';document.head.appendChild(s)})();
