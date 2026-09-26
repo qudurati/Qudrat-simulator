@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>الإحصائيات الشهرية | محاكي القدرات</title>
+<link rel="stylesheet" href="admin.css?v=23">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+body{background:#f5f8fc;color:#17345f}.statsPage{max-width:1050px;margin:0 auto;padding:22px 16px 50px}.pageHead{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:22px}.pageHead h1{margin:0;font-size:25px}.pageHead p{margin:5px 0 0;color:#718096}.back{display:inline-flex;align-items:center;padding:10px 14px;border-radius:11px;background:#fff;border:1px solid #dce7f2;color:#174d8d;text-decoration:none;font-weight:800}.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}.card{background:#fff;border:1px solid #dce7f2;border-radius:18px;padding:20px;box-shadow:0 5px 18px rgba(30,70,120,.05)}.card small{display:block;color:#718096;font-weight:700;margin-bottom:8px}.card b{font-size:30px;color:#174d8d}.panel{background:#fff;border:1px solid #dce7f2;border-radius:18px;padding:18px;box-shadow:0 5px 18px rgba(30,70,120,.05)}.panelHead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}.panelHead h2{margin:0;font-size:19px}.refresh{border:1px solid #bfd4ee;background:#eef5ff;color:#174d8d;border-radius:10px;padding:8px 14px;font-weight:800;cursor:pointer}.tableWrap{overflow:auto;border:1px solid #e4ebf4;border-radius:13px}table{width:100%;border-collapse:collapse;min-width:650px}th,td{text-align:center;padding:14px 10px;border-bottom:1px solid #edf2f7}th{background:#f5f9ff;color:#17345f;font-size:13px}tbody tr:last-child td{border-bottom:0}td:first-child{font-weight:900}.num{font-size:20px;font-weight:900;color:#174d8d}.loading{text-align:center;color:#718096;padding:28px}@media(max-width:650px){.statsPage{padding:15px 10px 35px}.pageHead{align-items:flex-start}.pageHead h1{font-size:21px}.summary{grid-template-columns:1fr}.card{padding:15px}.card b{font-size:26px}.panel{padding:10px}}
+</style>
+</head>
+<body>
+<main class="statsPage">
+<div class="pageHead"><div><h1>الإحصائيات الشهرية</h1><p>متابعة التسجيلات والاشتراكات شهرًا بشهر</p></div><a class="back" href="admin.html">العودة للوحة المالك</a></div>
+<section class="summary"><article class="card"><small>المسجلون الجدد هذا الشهر</small><b id="currentRegistered">—</b></article><article class="card"><small>المشتركون الجدد هذا الشهر</small><b id="currentNew">—</b></article><article class="card"><small>المشتركون النشطون</small><b id="currentActive">—</b></article></section>
+<section class="panel"><div class="panelHead"><h2>تفاصيل الأشهر</h2><button class="refresh" id="refresh" type="button">تحديث</button></div><div class="tableWrap"><div id="content" class="loading">جاري تحميل الإحصائيات...</div></div></section>
+</main>
+<script src="supabase-config.js"></script>
+<script>
+const db=window.getQudratSupabase();
+const digits=x=>String(x??0).replace(/[0-9]/g,d=>'٠١٢٣٤٥٦٧٨٩'[+d]);
+const monthLabel=v=>new Intl.DateTimeFormat('ar-SA-u-ca-gregory',{month:'long',year:'numeric',timeZone:'Asia/Riyadh'}).format(new Date(v+'T00:00:00+03:00'));
+async function load(){const content=document.getElementById('content');content.className='loading';content.textContent='جاري تحميل الإحصائيات...';const {data:{session}}=await db.auth.getSession();if(!session){location.replace('admin.html');return}const {data,error}=await db.rpc('owner_monthly_stats_v2');if(error){content.textContent='تعذر تحميل الإحصائيات. تأكد من الدخول بحساب المالك.';return}if(!data?.length){content.textContent='لا توجد بيانات حتى الآن.';return}const cur=data[0];document.getElementById('currentRegistered').textContent=digits(cur.registered_count);document.getElementById('currentNew').textContent=digits(cur.subscribed_count);document.getElementById('currentActive').textContent=digits(cur.active_subscribers_count);content.className='';content.innerHTML='<table><thead><tr><th>الشهر</th><th>المسجلون الجدد</th><th>المشتركون الجدد</th><th>المشتركون النشطون</th></tr></thead><tbody>'+data.map(r=>'<tr><td>'+monthLabel(r.month_start)+'</td><td><span class="num">'+digits(r.registered_count)+'</span></td><td><span class="num">'+digits(r.subscribed_count)+'</span></td><td><span class="num">'+digits(r.active_subscribers_count)+'</span></td></tr>').join('')+'</tbody></table>'}
+document.getElementById('refresh').onclick=load;load();
+</script>
+</body></html>
