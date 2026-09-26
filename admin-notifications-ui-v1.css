@@ -1,20 +1,21 @@
-.notificationBox{max-width:850px;margin:0 auto 22px;background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:0;overflow:hidden;box-shadow:0 8px 24px rgba(15,23,42,.07)}
-.notificationHead{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 17px;background:#fff;border-bottom:1px solid #e8eef5}
-.notificationHead h2{margin:0;font-size:17px;display:flex;align-items:center;gap:8px;color:#17345f;font-weight:800}
-.notifBadge{display:none;min-width:22px;height:22px;line-height:22px;text-align:center;background:#dc2626;color:#fff;border-radius:999px;padding:0 6px;font-size:11px;font-weight:800}
-.notifBadge.show{display:inline-block}
-#notificationList{padding:10px;background:#f8fafc}
-#notificationList>small{display:block;text-align:center;color:#64748b;background:#fff;border:1px dashed #cbd5e1;border-radius:12px;padding:20px 10px;font-weight:600}
-.notifItem{position:relative;margin-top:7px;padding:12px 50px 12px 13px;border:1px solid #e2e8f0;border-radius:12px;background:#fff;cursor:pointer;transition:.16s ease}
-.notifItem:first-child{margin-top:0}
-.notifItem:hover{border-color:#b8cbe3;box-shadow:0 4px 12px rgba(23,52,95,.07)}
-.notifItem:before{content:'✓';position:absolute;right:13px;top:13px;width:28px;height:28px;border-radius:50%;background:#eaf2ff;color:#245a9f;display:grid;place-items:center;font-size:14px;font-weight:900}
-.notifItem b{display:block;color:#172b4d;font-size:14px;font-weight:800;margin-bottom:3px}
-.notifItem span{display:block;color:#475569;font-size:13px;line-height:1.55;font-weight:500}
-.notifItem small{display:block;color:#94a3b8;font-size:11px;margin-top:5px;font-weight:600}
-.notificationActions{display:flex;gap:6px;align-items:center}
-.notificationActions button{border:1px solid #d8e1ec;background:#f8fafc;color:#334155;border-radius:9px;padding:6px 10px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;transition:.16s}
-.notificationActions button:hover{background:#eef4fb;border-color:#b8cbe3;color:#17345f}
-#readNotifs{background:#17345f;color:#fff;border-color:#17345f}
-#readNotifs:hover{background:#245a9f;color:#fff;border-color:#245a9f}
-@media(max-width:650px){.notificationBox{border-radius:15px}.notificationHead{padding:13px;gap:8px}.notificationHead h2{font-size:15px}.notificationActions{gap:4px}.notificationActions button{font-size:10px;padding:6px 7px}#notificationList{padding:8px}.notifItem{padding:11px 45px 11px 10px;border-radius:11px}.notifItem:before{right:10px;top:11px;width:27px;height:27px}}
+#dashboardView .notificationBox{max-width:850px;margin:0 auto 22px;background:#fff;border:1px solid #dbe4ef;border-radius:20px;padding:0;overflow:hidden;box-shadow:0 8px 26px rgba(15,23,42,.08)}
+#dashboardView .notificationHead{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 18px;background:linear-gradient(135deg,#f8fbff,#eef5ff);border-bottom:1px solid #dfe8f3}
+#dashboardView .notificationHead h2{margin:0;font-size:17px;display:flex;align-items:center;gap:8px;color:#17345f;font-weight:900}
+#dashboardView .notifBadge{display:none;min-width:23px;height:23px;line-height:23px;text-align:center;background:#dc2626;color:#fff;border-radius:999px;padding:0 7px;font-size:11px;font-weight:900}
+#dashboardView .notifBadge.show{display:inline-block}
+#dashboardView #notificationList{padding:10px 12px 12px;background:#f8fafc}
+#dashboardView #notificationList>small{display:block;text-align:center;color:#64748b;background:#fff;border:1px dashed #cbd5e1;border-radius:13px;padding:21px 10px;font-weight:700}
+#dashboardView .notifItem{position:relative;margin-top:8px;padding:13px 52px 12px 14px;border:1px solid #e1e8f0;border-radius:13px;background:#fff;cursor:pointer;transition:.16s ease;box-shadow:0 2px 7px rgba(15,23,42,.025)}
+#dashboardView .notifItem:first-child{margin-top:0}
+#dashboardView .notifItem:hover{border-color:#a9c2df;box-shadow:0 5px 14px rgba(23,52,95,.08);transform:translateY(-1px)}
+#dashboardView .notifItem:before{content:'👤';position:absolute;right:13px;top:13px;width:30px;height:30px;border-radius:10px;background:#e8f1ff;color:#245a9f;display:grid;place-items:center;font-size:15px}
+#dashboardView .notifItem b{display:block;color:#172b4d;font-size:14px;font-weight:900;margin:0 0 3px}
+#dashboardView .notifItem span{display:block;color:#475569;font-size:13px;line-height:1.55;font-weight:500}
+#dashboardView .notifItem br{display:none}
+#dashboardView .notifItem small{display:block;color:#94a3b8;font-size:11px;margin-top:5px;font-weight:600}
+#dashboardView .notificationActions{display:flex;gap:7px;align-items:center}
+#dashboardView .notificationActions button{border:1px solid #cbd8e8;background:#fff;color:#334155;border-radius:9px;padding:7px 11px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;transition:.16s;box-shadow:none}
+#dashboardView .notificationActions button:hover{background:#edf4fc;border-color:#a9c2df;color:#17345f}
+#dashboardView #readNotifs{background:#17345f;color:#fff;border-color:#17345f}
+#dashboardView #readNotifs:hover{background:#245a9f;color:#fff;border-color:#245a9f}
+@media(max-width:650px){#dashboardView .notificationBox{border-radius:16px}#dashboardView .notificationHead{padding:13px;gap:8px;flex-wrap:wrap}#dashboardView .notificationHead h2{font-size:15px}#dashboardView .notificationActions{gap:5px}#dashboardView .notificationActions button{font-size:11px;padding:6px 8px}#dashboardView #notificationList{padding:8px}#dashboardView .notifItem{padding:12px 47px 11px 10px;border-radius:11px}#dashboardView .notifItem:before{right:10px;top:11px;width:28px;height:28px}}
