@@ -1,0 +1,17 @@
+/* Selectable activities and assessment tools for NAFS sustainable plan */
+(()=>{
+const OPTIONS={
+ reading:{activities:['قراءة نصوص متنوعة وتوظيف المهارات المختارة في سياقات جديدة','أسئلة استنتاج ومقارنة ونقد وتبرير بالدليل','أنشطة فردية وتعاونية لبناء استجابات أعمق','تحليل نص قصير وتحديد الأدلة الداعمة','مناقشة جماعية وتبرير الإجابات من النص','تطبيق المهارة على نص جديد'],tools:['بطاقة ملاحظة للأداء','أسئلة قصيرة على نصوص جديدة','مهمة أدائية تتطلب توظيف الدليل وتبرير الإجابة','قائمة تحقق لمؤشرات الأداء','اختبار قصير قبلي وبعدي','ملف إنجاز لأعمال الطالبة']},
+ math:{activities:['حل مسائل غير روتينية في مواقف حياتية','مقارنة استراتيجيات الحل وشرح الأنسب','تحليل الأخطاء والتحقق من معقولية الناتج','حل مسائل متدرجة الصعوبة','تمثيل المسألة بأكثر من طريقة','تطبيق المهارة في موقف حياتي جديد'],tools:['مسائل أداء قصيرة متعددة المستويات','قائمة تحقق لخطوات الحل','بطاقة تحليل أخطاء','مهمة تطبيقية','اختبار قصير قبلي وبعدي','بطاقة ملاحظة للأداء']},
+ science:{activities:['مواقف استقصائية تتطلب الملاحظة والتفسير والاستنتاج','تحليل بيانات ونتائج وبناء تفسير علمي بالأدلة','تطبيق المفهوم في موقف جديد','تنفيذ نشاط استقصائي موجه','مقارنة النتائج وتفسير أسباب الاختلاف','ربط المفهوم العلمي بموقف حياتي'],tools:['مهمة استقصائية','بطاقة ملاحظة للأداء','أسئلة تفسير بيانات ونتائج','سجل تعلم','مهمة تطبيقية','اختبار قصير قبلي وبعدي']}
+};
+const esc=s=>String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+function key(){const v=document.getElementById('subject')?.value;return v==='reading'?'reading':v==='math'?'math':'science'}
+function block(id,title,items){return `<div class="f full selectableBlock"><label>${title}</label><div id="${id}" class="checks">${items.map((x,i)=>`<label class="check"><input type="checkbox" value="${esc(x)}" ${i<3?'checked':''}><span>${esc(x)}</span></label>`).join('')}</div></div>`}
+function render(){const grid=document.querySelector('.grid'),inds=document.getElementById('indicators')?.closest('.f');if(!grid||!inds)return;document.querySelectorAll('.selectableBlock').forEach(x=>x.remove());const o=OPTIONS[key()];inds.insertAdjacentHTML('afterend',block('activityChoices','إجراءات وأنشطة الاستدامة',o.activities)+block('toolChoices','أدوات القياس والمتابعة',o.tools))}
+function selected(id){return [...document.querySelectorAll(`#${id} input:checked`)].map(x=>x.value)}
+const oldLoadSubjects=window.loadSubjects,oldLoadDomains=window.loadDomains;
+window.loadSubjects=function(){const r=oldLoadSubjects?.apply(this,arguments);setTimeout(render,0);return r};
+window.loadDomains=function(){const r=oldLoadDomains?.apply(this,arguments);setTimeout(render,0);return r};
+const wait=setInterval(()=>{if(typeof window.pdf==='function'&&document.querySelector('.grid')){clearInterval(wait);render();const original=window.pdf;window.pdf=async function(){const acts=selected('activityChoices'),tools=selected('toolChoices');if(!acts.length)return alert('اختر إجراءً أو نشاطًا واحدًا على الأقل');if(!tools.length)return alert('اختر أداة قياس ومتابعة واحدة على الأقل');const oldProfiles=window.profiles;window.profiles=function(skills,subj){const q=oldProfiles(skills,subj);q.act=acts.join(' • ');q.tools=tools.join(' • ');return q};try{return await original.apply(this,arguments)}finally{window.profiles=oldProfiles}}}},50);
+})();
