@@ -1,10 +1,10 @@
-/* Remedial PDF: explicit red theme */
+/* Remedial PDF: explicit red theme - fit width viewer */
 window.NAFS_PDF_REMEDIAL={
  async ensureRenderer(){
   if(window.NAFS_PDF_TEST?.download) return;
   await new Promise((resolve,reject)=>{
    const s=document.createElement('script');
-   s.src='nafs-pdf-test.js?v=402-a4-preview';
+   s.src='nafs-pdf-test.js?v=404-fit-width';
    s.onload=resolve;
    s.onerror=()=>reject(new Error('تعذر تحميل محرك التقرير'));
    document.head.appendChild(s);
