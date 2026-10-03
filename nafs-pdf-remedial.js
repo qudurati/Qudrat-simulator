@@ -4,7 +4,7 @@ window.NAFS_PDF_REMEDIAL={
   if(window.NAFS_PDF_TEST?.download) return;
   await new Promise((resolve,reject)=>{
    const s=document.createElement('script');
-   s.src='nafs-pdf-test.js?v=400-20261002-red';
+   s.src='nafs-pdf-test.js?v=402-a4-preview';
    s.onload=resolve;
    s.onerror=()=>reject(new Error('تعذر تحميل محرك التقرير'));
    document.head.appendChild(s);
