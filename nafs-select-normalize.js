@@ -1,0 +1,1 @@
+(()=>{const s=document.createElement('style');s.id='nafs-select-normalize';s.textContent=`select{color:#111827!important;-webkit-text-fill-color:#111827!important;font-size:16px!important;min-height:44px!important;padding-top:10px!important;padding-bottom:10px!important}`;document.head.appendChild(s)})();
