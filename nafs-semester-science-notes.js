@@ -1,3 +1,8 @@
+/* Semester plan select normalization: match remedial plan */
+(()=>{
+ const apply=()=>{const s=document.createElement('style');s.textContent='select{height:46px!important;min-height:46px!important;font-size:16px!important;color:#111827!important;-webkit-text-fill-color:#111827!important}';document.head.appendChild(s)};
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',apply);else apply();
+})();
 /* Skill-aware science training notes for NAFS semester plan */
 (()=>{
  const pick=(a,w)=>a[w%a.length];
