@@ -1,31 +1,84 @@
-(()=>{
-  const s=document.createElement('style');
-  s.id='nafs-select-normalize';
-  s.textContent=`select{color:#111827!important;-webkit-text-fill-color:#111827!important;font-size:16px!important;min-height:44px!important;padding-top:10px!important;padding-bottom:10px!important}`;
-  document.head.appendChild(s);
+// NAFS display normalization
+// Keep stored/internal values unchanged, but normalize labels shown to users.
+(function () {
+  'use strict';
 
-  const normalizeText=(v)=>String(v||'')
-    .replace(/العلوم الطبيعية/g,'العلوم')
-    .replace(/الصف\s*الثالث\s*المتوسط\s*[\(（]?\s*(?:التاسع|9|٩)\s*[\)）]?/g,'الثالث متوسط')
-    .replace(/الثالث\s*متوسط\s*[\(（]?\s*(?:التاسع|9|٩)\s*[\)）]?/g,'الثالث متوسط')
-    .replace(/الثالث\s*المتوسط\s*[\(（]?\s*(?:التاسع|9|٩)\s*[\)）]?/g,'الثالث متوسط');
+  function normalizeText(value) {
+    if (typeof value !== 'string') return value;
+    return value.replace(/القراءة/g, 'لغتي');
+  }
 
-  const normalize=()=>{
-    document.querySelectorAll('option').forEach(el=>{
-      const t=normalizeText(el.textContent);
-      if(el.textContent!==t) el.textContent=t;
-    });
-    document.querySelectorAll('body *').forEach(el=>{
-      if(el.children.length===0 && el.textContent){
-        const t=normalizeText(el.textContent);
-        if(el.textContent!==t) el.textContent=t;
+  function normalizeElement(el) {
+    if (!el || el.nodeType !== 1) return;
+
+    // Normalize option labels while preserving their original values.
+    if (el.tagName === 'OPTION') {
+      el.textContent = normalizeText(el.textContent);
+      return;
+    }
+
+    // Normalize common form labels/placeholders without changing stored values.
+    if (el.hasAttribute && el.hasAttribute('placeholder')) {
+      el.setAttribute('placeholder', normalizeText(el.getAttribute('placeholder')));
+    }
+    if (el.hasAttribute && el.hasAttribute('title')) {
+      el.setAttribute('title', normalizeText(el.getAttribute('title')));
+    }
+
+    // Text nodes cover lists, cards, tables and generated report previews.
+    Array.from(el.childNodes || []).forEach(function (node) {
+      if (node.nodeType === 3 && node.nodeValue && node.nodeValue.indexOf('القراءة') !== -1) {
+        node.nodeValue = normalizeText(node.nodeValue);
       }
     });
-  };
 
-  normalize();
-  new MutationObserver(normalize).observe(document.documentElement,{childList:true,subtree:true,characterData:true});
+    if (el.querySelectorAll) {
+      el.querySelectorAll('option').forEach(function (option) {
+        option.textContent = normalizeText(option.textContent);
+      });
+    }
+  }
 
-  const oldPrint=window.print;
-  window.print=function(){normalize();return oldPrint.apply(window,arguments)};
+  function normalizePage(root) {
+    if (!root) return;
+    if (root.nodeType === 1) normalizeElement(root);
+    if (root.querySelectorAll) {
+      root.querySelectorAll('*').forEach(normalizeElement);
+    }
+  }
+
+  function start() {
+    normalizePage(document.body);
+
+    var observer = new MutationObserver(function (mutations) {
+      mutations.forEach(function (mutation) {
+        mutation.addedNodes.forEach(function (node) {
+          if (node.nodeType === 3 && node.nodeValue && node.nodeValue.indexOf('القراءة') !== -1) {
+            node.nodeValue = normalizeText(node.nodeValue);
+          } else if (node.nodeType === 1) {
+            normalizePage(node);
+          }
+        });
+
+        if (mutation.type === 'characterData' && mutation.target.nodeValue && mutation.target.nodeValue.indexOf('القراءة') !== -1) {
+          mutation.target.nodeValue = normalizeText(mutation.target.nodeValue);
+        }
+      });
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      characterData: true
+    });
+
+    // Expose formatter for report/PDF code that builds strings outside the DOM.
+    window.nafsDisplaySubject = normalizeText;
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', start);
+  } else {
+    start();
+  }
 })();
