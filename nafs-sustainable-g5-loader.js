@@ -1,6 +1,23 @@
 (()=>{
   if(window.__NAFS_G45_SUSTAINABLE_BOOT)return;
   window.__NAFS_G45_SUSTAINABLE_BOOT=true;
+
+  // Keep native iOS/Safari form controls visually consistent across iPhones.
+  const style=document.createElement('style');
+  style.textContent=`
+    select,
+    select option {
+      color:#172033 !important;
+      -webkit-text-fill-color:#172033 !important;
+    }
+    select:disabled {
+      color:#667085 !important;
+      -webkit-text-fill-color:#667085 !important;
+      opacity:1;
+    }
+  `;
+  document.head.appendChild(style);
+
   const addGrades=()=>{
     const grade=document.getElementById('grade');
     if(!grade)return false;
