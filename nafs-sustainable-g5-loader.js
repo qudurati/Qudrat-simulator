@@ -2,6 +2,27 @@
   if(window.__NAFS_G45_SUSTAINABLE_BOOT)return;
   window.__NAFS_G45_SUSTAINABLE_BOOT=true;
 
+  const fixWhatsApp=()=>{
+    const links=[...document.querySelectorAll('a[href*="wa.me/966509599798"],a[href*="api.whatsapp.com"]')];
+    links.forEach(a=>{
+      a.style.setProperty('position','static','important');
+      a.style.setProperty('inset','auto','important');
+      a.style.setProperty('left','auto','important');
+      a.style.setProperty('right','auto','important');
+      a.style.setProperty('top','auto','important');
+      a.style.setProperty('bottom','auto','important');
+      a.style.setProperty('transform','none','important');
+      a.style.setProperty('z-index','auto','important');
+      a.style.setProperty('display','flex','important');
+      a.style.setProperty('width','100%','important');
+      a.style.setProperty('max-width','320px','important');
+      a.style.setProperty('margin','18px auto 0','important');
+      a.style.setProperty('justify-content','center','important');
+      const card=document.querySelector('.wrap .card');
+      if(card&&a.parentElement!==card)card.appendChild(a);
+    });
+  };
+
   const patchReport=()=>{
     if(window.__NAFS_G45_DOMAIN_REPORT_FIX||typeof window.sec!=='function')return;
     const originalSec=window.sec;
@@ -41,14 +62,17 @@
     if(!grade.dataset.g45sync){grade.dataset.g45sync='1';grade.addEventListener('change',()=>setTimeout(sync,0));}
     sync();
     patchReport();
+    fixWhatsApp();
     return true;
   };
+  const observer=new MutationObserver(fixWhatsApp);
+  observer.observe(document.documentElement,{childList:true,subtree:true});
   const load=(src,done)=>{const s=document.createElement('script');s.src=src;s.onload=done;document.head.appendChild(s)};
   load('nafs-g4-data.js?v=20261005-g4-sustainable',()=>{
     load('nafs-g5-data.js?v=20261005-g5-sustainable',()=>{
       addGrades();
       let tries=0;
-      const timer=setInterval(()=>{addGrades();patchReport();if(++tries>30)clearInterval(timer)},100);
+      const timer=setInterval(()=>{addGrades();patchReport();fixWhatsApp();if(++tries>30)clearInterval(timer)},100);
     });
   });
 })();
