@@ -10,6 +10,10 @@
       color:#172033 !important;
       -webkit-text-fill-color:#172033 !important;
     }
+    select {
+      min-height:44px;
+      font-size:16px;
+    }
     select:disabled {
       color:#667085 !important;
       -webkit-text-fill-color:#667085 !important;
