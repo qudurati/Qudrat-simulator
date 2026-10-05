@@ -1,0 +1,2 @@
+Trigger a fresh GitHub Pages deployment after the previous deployment run became stuck/cancelled.
+2026-10-05
