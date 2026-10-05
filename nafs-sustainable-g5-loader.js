@@ -1,6 +1,21 @@
 (()=>{
   if(window.__NAFS_G45_SUSTAINABLE_BOOT)return;
   window.__NAFS_G45_SUSTAINABLE_BOOT=true;
+
+  const patchReport=()=>{
+    if(window.__NAFS_G45_DOMAIN_REPORT_FIX||typeof window.sec!=='function')return;
+    const originalSec=window.sec;
+    window.sec=function(i,t,c,cl=''){
+      const grade=document.getElementById('grade')?.value;
+      if(t==='المجال والمسار'&&['g4','g5'].includes(grade)){
+        const domain=document.getElementById('domain')?.value||'';
+        return originalSec.call(this,i,t,typeof window.esc==='function'?window.esc(domain):domain,cl);
+      }
+      return originalSec.call(this,i,t,c,cl);
+    };
+    window.__NAFS_G45_DOMAIN_REPORT_FIX=true;
+  };
+
   const addGrades=()=>{
     const grade=document.getElementById('grade');
     if(!grade)return false;
@@ -25,6 +40,7 @@
     };
     if(!grade.dataset.g45sync){grade.dataset.g45sync='1';grade.addEventListener('change',()=>setTimeout(sync,0));}
     sync();
+    patchReport();
     return true;
   };
   const load=(src,done)=>{const s=document.createElement('script');s.src=src;s.onload=done;document.head.appendChild(s)};
@@ -32,7 +48,7 @@
     load('nafs-g5-data.js?v=20261005-g5-sustainable',()=>{
       addGrades();
       let tries=0;
-      const timer=setInterval(()=>{addGrades();if(++tries>30)clearInterval(timer)},100);
+      const timer=setInterval(()=>{addGrades();patchReport();if(++tries>30)clearInterval(timer)},100);
     });
   });
 })();
