@@ -1,5 +1,8 @@
 /* Remedial PDF: explicit red theme - fit width viewer */
 (()=>{
+ const uiStyle=document.createElement('style');
+ uiStyle.textContent='select{color:#111827!important;-webkit-text-fill-color:#111827!important;font-size:16px!important;min-height:44px!important;line-height:1.25!important}';
+ document.head.appendChild(uiStyle);
  function neutralize(){
   const teacher=document.getElementById('teacher'),principal=document.getElementById('principal');
   if(teacher){const l=teacher.closest('.f')?.querySelector('label');if(l)l.textContent='الاسم';const n=sessionStorage.getItem('nafsTeacherName');if(n){teacher.value=n;teacher.readOnly=true;teacher.style.background='#f2f4f7';teacher.style.color='#475467';teacher.style.fontWeight='700';teacher.title='الاسم مرتبط باشتراك نافس ولا يمكن تغييره'}}
