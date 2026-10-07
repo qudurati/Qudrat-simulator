@@ -38,6 +38,11 @@
       for(let week=0;week<18;week++){
         if(!reviewWeeks.has(week)&&pos<all.length)groups[week].push(all[pos++]);
       }
+    }else if(($('grade')?.value||'')==='g5'&&subject==='science'){
+      /* Grade 5 science ONLY: mirror nafs-semester-plan-v3-core review weeks exactly. */
+      const reviewWeeks=new Set([2,5,8,11,14,17]),active=[];
+      for(let week=0;week<18;week++)if(!reviewWeeks.has(week))active.push(week);
+      all.forEach((x,i)=>groups[active[i%active.length]].push(x));
     }else{
       all.forEach((x,i)=>groups[i%18].push(x));
     }
