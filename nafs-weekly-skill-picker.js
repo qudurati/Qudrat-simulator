@@ -7,6 +7,18 @@
   /* EXACTLY mirrors the ACTIVE semester plan (nafs-semester-plan-v3-core.html -> build18):
      every subject is distributed over all 18 weeks with sk[i % 18].
      Do not reserve/remap weeks here. */
+  const $=id=>document.getElementById(id);
+  const splitPath=v=>{const p=String(v||'').split(' — ');return{domain:p[0]||'',sub:p.slice(1).join(' — ')||''}};
+  function catalog(){
+    const rs=typeof data==='function'?data($('subject')?.value,$('grade')?.value):[];
+    const out=[];
+    rs.forEach(r=>(r[2]||[]).forEach(skill=>{
+      const s=String(skill||'').trim(); if(!s)return;
+      const p=splitPath(r[0]);
+      out.push({skill:s,domain:p.domain,sub:p.sub||p.domain,outcome:r[1]||''});
+    }));
+    return out;
+  }
   function semesterWeekEntries(){
     const all=catalog();
     if(!all.length)return [];
