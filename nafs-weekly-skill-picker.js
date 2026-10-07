@@ -11,9 +11,15 @@
     const all=catalog();
     if(!all.length)return [];
     const groups=Array.from({length:18},()=>[]);
-    /* Same active semester build18: skill i belongs ONLY to week i%18.
-       No fallback/repetition into empty weeks. */
-    all.forEach((x,i)=>groups[i%18].push(x));
+    /* Mirror the semester plan by skill TEXT, but keep every matching catalog
+       entry so a week can contain multiple skills from multiple domains. */
+    const semesterSkills=[];
+    const rs=typeof data==='function'?data($('subject')?.value,$('grade')?.value):[];
+    rs.forEach(r=>(r[2]||[]).forEach(s=>{s=String(s||'').trim();if(s&&!semesterSkills.includes(s))semesterSkills.push(s)}));
+    semesterSkills.forEach((skill,i)=>{
+      const matches=all.filter(x=>x.skill===skill);
+      groups[i%18].push(...matches);
+    });
     const sel=$('nafsPlanWeek');
     const w=sel?Number(sel.value):0;
     return Number.isInteger(w)&&w>=0&&w<18 ? groups[w] : [];
