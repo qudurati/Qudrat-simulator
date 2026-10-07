@@ -46,9 +46,9 @@
     return [...document.querySelectorAll('#indicators input:checked')].map(x=>list[+x.value]).filter(Boolean);
   }
   function pathHtml(items){
-    const groups=new Map();
-    items.forEach(x=>{const k=x.domain+'|||'+x.sub;if(!groups.has(k))groups.set(k,[]);groups.get(k).push(x)});
-    return [...groups.entries()].map(([k,a])=>{const [d,s]=k.split('|||');return `<div style="margin:4px 0"><b>${esc2(d)}</b>${s&&s!==d?' ← '+esc2(s):''}</div>`}).join('');
+    const seen=new Set(),paths=[];
+    items.forEach(x=>{const k=x.domain+'|||'+x.sub;if(seen.has(k))return;seen.add(k);paths.push('<span style="display:inline-block;margin:2px 5px;padding:3px 7px;border:1px solid rgba(80,80,80,.12);border-radius:7px"><b>'+esc2(x.domain)+'</b>'+(x.sub&&x.sub!==x.domain?' ← '+esc2(x.sub):'')+'</span>')});
+    return '<div style="display:flex;flex-wrap:wrap;justify-content:center;gap:2px;line-height:1.25">'+paths.join('')+'</div>';
   }
   function installPdf(){
     if(!install())return;
@@ -60,7 +60,7 @@
         const skills=items.map(x=>x.skill),subjectCode=$('subject').value;
         const g=$('grade').selectedOptions[0]?.text||'',s=$('subject').selectedOptions[0]?.text||'',sc=$('school').value,t=$('teacher').value,p=$('principal').value,dy=$('day').value,dt=typeof hdate==='function'?hdate():'',week=+$('nafsPlanWeek').value+1;
         $('metaCards').innerHTML=`<div class="metaCard"><b>المدرسة</b>${esc2(sc||'—')}</div><div class="metaCard"><b>الصف</b>${esc2(g)}</div><div class="metaCard"><b>المادة</b>${esc2(s)}</div><div class="metaCard"><b>الأسبوع</b>${week}</div><div class="metaCard"><b>التاريخ</b>${esc2(dt)}</div>`;
-        const skillHtml=items.map(x=>`<div style="margin:5px 0;padding:6px 10px;border-radius:10px;background:rgba(255,255,255,.62);border:1px solid rgba(80,80,80,.14)"><b>${esc2(x.skill)}</b><div style="font-size:12px;margin-top:2px">${esc2(x.domain)}${x.sub&&x.sub!==x.domain?' ← '+esc2(x.sub):''}</div></div>`).join('');
+        const skillHtml='<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px">'+items.map(x=>`<div style="padding:4px 7px;border-radius:7px;background:rgba(255,255,255,.62);border:1px solid rgba(80,80,80,.12);font-size:12px;line-height:1.3"><b>${esc2(x.skill)}</b></div>`).join('')+'</div>';
         if(MODE==='sustainable'){
           const q=profiles(skills,subjectCode);
           const acts=[...document.querySelectorAll('#activityChoices input:checked')].map(x=>x.value),tools=[...document.querySelectorAll('#toolChoices input:checked')].map(x=>x.value);
