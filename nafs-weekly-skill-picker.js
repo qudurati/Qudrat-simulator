@@ -7,10 +7,15 @@
   const splitPath=v=>{const p=String(v||'').split(' — ');return{domain:p[0]||'',sub:p.slice(1).join(' — ')||''}};
   function catalog(){
     const rs=typeof data==='function'?data($('subject')?.value,$('grade')?.value):[];
-    const out=[],seen=new Set();
+    /* Match semester plan skills() EXACTLY: uniqueness is by the trimmed skill
+       string only, preserving the first occurrence and original row order. */
+    const out=[],skillStrings=[];
     rs.forEach(r=>(r[2]||[]).forEach(skill=>{
-      const s=String(skill||'').trim(); if(!s||seen.has(s))return; seen.add(s);
-      const p=splitPath(r[0]); out.push({skill:s,domain:p.domain,sub:p.sub||p.domain,outcome:r[1]||''});
+      const s=String(skill||'').trim();
+      if(!s||skillStrings.includes(s))return;
+      skillStrings.push(s);
+      const p=splitPath(r[0]);
+      out.push({skill:s,domain:p.domain,sub:p.sub||p.domain,outcome:r[1]||''});
     }));
     return out;
   }
