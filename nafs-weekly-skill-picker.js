@@ -14,13 +14,25 @@
     }));
     return out;
   }
-  function weekEntries(){
-    const all=catalog(),groups=Array.from({length:training.length},()=>[]);
-    all.forEach((x,i)=>groups[i%training.length].push(x));
+  /* IMPORTANT: this is intentionally the exact same distribution rule used
+     by nafs-semester-plan-v2.html. The semester plan is the source of truth:
+     same unique skill order, same reserved weeks, same modulo distribution. */
+  function semesterWeekEntries(){
+    const all=catalog();
+    const groups=Array.from({length:training.length},()=>[]);
+    if(all.length){
+      for(let i=0;i<all.length;i++) groups[i%training.length].push(all[i]);
+      /* Keep this fallback identical to distributeSkills() in the semester plan.
+         It matters only when there are fewer unique skills than training weeks. */
+      for(let i=0;i<training.length;i++){
+        if(!groups[i].length) groups[i].push(all[i%all.length]);
+      }
+    }
     const w=+$('nafsPlanWeek')?.value;
     const pos=training.indexOf(w);
     return pos<0?[]:(groups[pos]||[]);
   }
+  function weekEntries(){ return semesterWeekEntries(); }
   function esc2(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
   function renderWeekSkills(){
     const box=$('indicators'); if(!box)return;
