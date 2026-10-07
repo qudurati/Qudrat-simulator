@@ -23,15 +23,24 @@
     const all=catalog();
     if(!all.length)return [];
     const groups=Array.from({length:18},()=>[]);
-    /* Mirror the semester plan by skill TEXT, but keep every matching catalog
-       entry so a week can contain multiple skills from multiple domains. */
-    const semesterSkills=[];
-    const rs=typeof data==='function'?data($('subject')?.value,$('grade')?.value):[];
-    rs.forEach(r=>(r[2]||[]).forEach(s=>{s=String(s||'').trim();if(s&&!semesterSkills.includes(s))semesterSkills.push(s)}));
-    semesterSkills.forEach((skill,i)=>{
-      const matches=all.filter(x=>x.skill===skill);
-      groups[i%18].push(...matches);
-    });
+    const subject=$('subject')?.value||'';
+    /* Mirror ACTIVE semester build18 exactly, including review weeks.
+       Reading subjects with fewer than 18 skills insert spaced review weeks;
+       skills after a review must NOT shift into that review week. */
+    if(subject==='reading'&&all.length>0&&all.length<18){
+      const reviewCount=18-all.length,reviewWeeks=new Set();
+      for(let r=1;r<=reviewCount;r++){
+        let idx=Math.round((r*18)/(reviewCount+1))-1;
+        while(reviewWeeks.has(idx)&&idx<17)idx++;
+        reviewWeeks.add(idx);
+      }
+      let pos=0;
+      for(let week=0;week<18;week++){
+        if(!reviewWeeks.has(week)&&pos<all.length)groups[week].push(all[pos++]);
+      }
+    }else{
+      all.forEach((x,i)=>groups[i%18].push(x));
+    }
     const sel=$('nafsPlanWeek');
     const w=sel?Number(sel.value):0;
     return Number.isInteger(w)&&w>=0&&w<18 ? groups[w] : [];
