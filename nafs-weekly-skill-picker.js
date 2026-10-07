@@ -4,46 +4,18 @@
   /* Exact semester-plan row mapping. Semester plan itself is NOT modified.
      Reserved semester rows: weeks 1, 16, 18 only. Weeks 3 and 4 are training
      rows in the currently published semester plan and must remain in sequence. */
-  /* Semester plan source of truth:
-     its build() reserves weeks 1, 3, 4, 16, 18 and distributes skills only
-     across the remaining 13 training rows. */
-  const reserved=new Set([0,2,3,15,17]);
-  const training=[];for(let i=0;i<18;i++)if(!reserved.has(i))training.push(i);
-  const $=id=>document.getElementById(id);
-  const splitPath=v=>{const p=String(v||'').split(' — ');return{domain:p[0]||'',sub:p.slice(1).join(' — ')||''}};
-  function catalog(){
-    const rs=typeof data==='function'?data($('subject')?.value,$('grade')?.value):[];
-    /* Match semester plan skills() EXACTLY: uniqueness is by the trimmed skill
-       string only, preserving the first occurrence and original row order. */
-    const out=[],skillStrings=[];
-    rs.forEach(r=>(r[2]||[]).forEach(skill=>{
-      const s=String(skill||'').trim();
-      if(!s||skillStrings.includes(s))return;
-      skillStrings.push(s);
-      const p=splitPath(r[0]);
-      out.push({skill:s,domain:p.domain,sub:p.sub||p.domain,outcome:r[1]||''});
-    }));
-    return out;
-  }
-  /* IMPORTANT: this is intentionally the exact same distribution rule used
-     by nafs-semester-plan-v2.html. The semester plan is the source of truth:
-     same unique skill order, same reserved weeks, same modulo distribution. */
+  /* EXACTLY mirrors the ACTIVE semester plan (nafs-semester-plan-v3-core.html -> build18):
+     every subject is distributed over all 18 weeks with sk[i % 18].
+     Do not reserve/remap weeks here. */
   function semesterWeekEntries(){
     const all=catalog();
-    const groups=Array.from({length:training.length},()=>[]);
-    if(all.length){
-      for(let i=0;i<all.length;i++) groups[i%training.length].push(all[i]);
-      /* Keep this fallback identical to distributeSkills() in the semester plan.
-         It matters only when there are fewer unique skills than training weeks. */
-      for(let i=0;i<training.length;i++){
-        if(!groups[i].length) groups[i].push(all[i%all.length]);
-      }
-    }
+    if(!all.length)return [];
+    const groups=Array.from({length:18},()=>[]);
+    all.forEach((x,i)=>groups[i%18].push(x));
     const w=+$('nafsPlanWeek')?.value;
-    const pos=training.indexOf(w);
-    return pos<0?[]:(groups[pos]||[]);
+    return (w>=0&&w<18)?groups[w]:[];
   }
-  function weekEntries(){ return semesterWeekEntries(); }
+  function weekEntries(){return semesterWeekEntries();}
   function esc2(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
   function renderWeekSkills(){
     const box=$('indicators'); if(!box)return;
