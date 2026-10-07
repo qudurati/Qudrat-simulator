@@ -4,7 +4,7 @@
   /* Exact semester-plan row mapping. Semester plan itself is NOT modified.
      Reserved semester rows: weeks 1, 16, 18 only. Weeks 3 and 4 are training
      rows in the currently published semester plan and must remain in sequence. */
-  const reserved=new Set([0,15,17]);
+  const reserved=new Set([0,2,3,15,17]);
   const training=[];for(let i=0;i<18;i++)if(!reserved.has(i))training.push(i);
   const $=id=>document.getElementById(id);
   const splitPath=v=>{const p=String(v||'').split(' — ');return{domain:p[0]||'',sub:p.slice(1).join(' — ')||''}};
