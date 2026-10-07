@@ -4,6 +4,9 @@
   /* Exact semester-plan row mapping. Semester plan itself is NOT modified.
      Reserved semester rows: weeks 1, 16, 18 only. Weeks 3 and 4 are training
      rows in the currently published semester plan and must remain in sequence. */
+  /* Semester plan source of truth:
+     its build() reserves weeks 1, 3, 4, 16, 18 and distributes skills only
+     across the remaining 13 training rows. */
   const reserved=new Set([0,2,3,15,17]);
   const training=[];for(let i=0;i<18;i++)if(!reserved.has(i))training.push(i);
   const $=id=>document.getElementById(id);
