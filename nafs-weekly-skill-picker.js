@@ -11,9 +11,12 @@
     const all=catalog();
     if(!all.length)return [];
     const groups=Array.from({length:18},()=>[]);
+    /* Same active semester build18: skill i belongs ONLY to week i%18.
+       No fallback/repetition into empty weeks. */
     all.forEach((x,i)=>groups[i%18].push(x));
-    const w=+$('nafsPlanWeek')?.value;
-    return (w>=0&&w<18)?groups[w]:[];
+    const sel=$('nafsPlanWeek');
+    const w=sel?Number(sel.value):0;
+    return Number.isInteger(w)&&w>=0&&w<18 ? groups[w] : [];
   }
   function weekEntries(){return semesterWeekEntries();}
   function esc2(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
