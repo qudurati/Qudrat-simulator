@@ -76,6 +76,9 @@
       // Wait for subscriber grade/subject normalization, then paint only if needed.
       scheduleWeekRefresh(220);
     });
+    // The legacy dependent-select loader writes unchecked indicators on every grade
+    // change. The weekly picker owns this visible box; prevent that intermediate paint.
+    if(MODE==='sustainable')window.loadIndicators=function(){scheduleWeekRefresh(90)};
     const oldLS=window.loadSubjects,oldLD=window.loadDomains;
     window.loadSubjects=function(){const r=oldLS?.apply(this,arguments);scheduleWeekRefresh(90);return r};
     window.loadDomains=function(){const r=oldLD?.apply(this,arguments);setTimeout(renderWeekSkills,0);return r};
