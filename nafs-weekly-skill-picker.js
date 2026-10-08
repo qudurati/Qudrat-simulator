@@ -68,7 +68,15 @@
     const oldLS=window.loadSubjects,oldLD=window.loadDomains;
     window.loadSubjects=function(){const r=oldLS?.apply(this,arguments);setTimeout(renderWeekSkills,0);return r};
     window.loadDomains=function(){const r=oldLD?.apply(this,arguments);setTimeout(renderWeekSkills,0);return r};
+    // Subscriber subject/grade is finalized asynchronously by the access guard.
+    // Render again after verification so first opening matches changing the week.
     setTimeout(renderWeekSkills,0);
+    if(MODE==='sustainable' && window.NAFS_GUARD_READY && typeof window.NAFS_GUARD_READY.then==='function'){
+      window.NAFS_GUARD_READY.then(access=>{
+        if(!access)return;
+        setTimeout(renderWeekSkills,0);
+      });
+    }
     return true;
   }
   function selectedEntries(){
