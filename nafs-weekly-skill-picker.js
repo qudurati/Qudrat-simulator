@@ -65,6 +65,12 @@
     ['domain','sub','outcome'].forEach(id=>{const e=$(id);if(e){const f=e.closest('.f');if(f)f.style.display='none'}});
     const lab=$('indicators')?.closest('.f')?.querySelector('label');if(lab)lab.textContent='مهارات الأسبوع — جميعها محددة تلقائيًا ويمكن استبعاد أي مهارة';
     $('nafsPlanWeek').addEventListener('change',renderWeekSkills);
+    // Grade changes may asynchronously rebuild the subscriber's subject list.
+    // Refresh after those updates without changing the semester distribution.
+    $('grade')?.addEventListener('change',()=>{
+      setTimeout(renderWeekSkills,0);
+      setTimeout(renderWeekSkills,180);
+    });
     const oldLS=window.loadSubjects,oldLD=window.loadDomains;
     window.loadSubjects=function(){const r=oldLS?.apply(this,arguments);setTimeout(renderWeekSkills,0);return r};
     window.loadDomains=function(){const r=oldLD?.apply(this,arguments);setTimeout(renderWeekSkills,0);return r};
