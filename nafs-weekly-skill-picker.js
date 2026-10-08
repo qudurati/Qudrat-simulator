@@ -68,7 +68,7 @@
     // Grade changes may asynchronously rebuild the subscriber's subject list.
     // Refresh after those updates without changing the semester distribution.
     $('grade')?.addEventListener('change',()=>{
-      setTimeout(renderWeekSkills,0);
+      // Wait for subscriber grade/subject normalization, then paint only if needed.
       setTimeout(renderWeekSkills,180);
     });
     const oldLS=window.loadSubjects,oldLD=window.loadDomains;
