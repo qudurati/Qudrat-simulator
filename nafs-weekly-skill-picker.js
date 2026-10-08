@@ -52,10 +52,15 @@
   }
   function weekEntries(){return semesterWeekEntries();}
   function esc2(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+  let refreshTimer=null;
+  function scheduleWeekRefresh(delay=90){clearTimeout(refreshTimer);refreshTimer=setTimeout(renderWeekSkills,delay)}
   function renderWeekSkills(){
     const box=$('indicators'); if(!box)return;
     const list=weekEntries();
-    box.innerHTML=list.length?list.map((x,i)=>`<label class="check" style="align-items:flex-start"><input type="checkbox" value="${i}" checked><span><b>${esc2(x.skill)}</b><small style="display:block;color:#667085;font-weight:400;margin-top:2px">${esc2(x.domain)}${x.sub&&x.sub!==x.domain?' ← '+esc2(x.sub):''}</small></span></label>`).join(''):'<div class="empty">هذا الأسبوع مخصص للاختبار أو المراجعة العامة ولا توجد مهارات موزعة عليه.</div>';
+    const html=list.length?list.map((x,i)=>`<label class="check" style="align-items:flex-start"><input type="checkbox" value="${i}" checked><span><b>${esc2(x.skill)}</b><small style="display:block;color:#667085;font-weight:400;margin-top:2px">${esc2(x.domain)}${x.sub&&x.sub!==x.domain?' ← '+esc2(x.sub):''}</small></span></label>`).join(''):'<div class="empty">هذا الأسبوع مخصص للاختبار أو المراجعة العامة ولا توجد مهارات موزعة عليه.</div>';
+    if(box.dataset.weekPickerHtml===html && box.innerHTML===html)return;
+    box.innerHTML=html;
+    box.dataset.weekPickerHtml=html;
   }
   function install(){
     const subject=$('subject'); if(!subject||$('nafsPlanWeek'))return false;
@@ -69,18 +74,18 @@
     // Refresh after those updates without changing the semester distribution.
     $('grade')?.addEventListener('change',()=>{
       // Wait for subscriber grade/subject normalization, then paint only if needed.
-      setTimeout(renderWeekSkills,180);
+      scheduleWeekRefresh(220);
     });
     const oldLS=window.loadSubjects,oldLD=window.loadDomains;
-    window.loadSubjects=function(){const r=oldLS?.apply(this,arguments);setTimeout(renderWeekSkills,0);return r};
+    window.loadSubjects=function(){const r=oldLS?.apply(this,arguments);scheduleWeekRefresh(90);return r};
     window.loadDomains=function(){const r=oldLD?.apply(this,arguments);setTimeout(renderWeekSkills,0);return r};
     // Subscriber subject/grade is finalized asynchronously by the access guard.
     // Render again after verification so first opening matches changing the week.
-    setTimeout(renderWeekSkills,0);
+    scheduleWeekRefresh(90);
     if(MODE==='sustainable' && window.NAFS_GUARD_READY && typeof window.NAFS_GUARD_READY.then==='function'){
       window.NAFS_GUARD_READY.then(access=>{
         if(!access)return;
-        setTimeout(renderWeekSkills,0);
+        scheduleWeekRefresh(90);
       });
     }
     return true;
