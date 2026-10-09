@@ -128,6 +128,7 @@
     ]
   ]
 ];
+ window.NAFS_G3_TRIAL_DATA=trial;
  async function verify(){
   try{
    if(!window.supabase)return;
