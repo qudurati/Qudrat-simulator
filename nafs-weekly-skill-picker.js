@@ -69,7 +69,7 @@
     const field=subject.closest('.f')||subject.parentElement;
     const w=document.createElement('div');w.className='f';w.innerHTML='<label>الأسبوع من الخطة الفصلية</label><select id="nafsPlanWeek">'+Array.from({length:18},(_,i)=>`<option value="${i}">الأسبوع ${i+1}</option>`).join('')+'</select>';
     field.insertAdjacentElement('afterend',w);
-    ['domain','sub','outcome'].forEach(id=>{const e=$(id);if(e){const f=e.closest('.f');if(f)f.style.display='none'}});
+    ['domain','sub','outcome'].forEach(id=>{const e=$(id);if(e){const f=e.closest('.f');if(f){f.style.setProperty('display','none','important');f.setAttribute('aria-hidden','true')}}});
     const lab=$('indicators')?.closest('.f')?.querySelector('label');if(lab)lab.textContent='مهارات الأسبوع — جميعها محددة تلقائيًا ويمكن استبعاد أي مهارة';
     $('nafsPlanWeek').addEventListener('change',renderWeekSkills);
     // Grade changes may asynchronously rebuild the subscriber's subject list.
