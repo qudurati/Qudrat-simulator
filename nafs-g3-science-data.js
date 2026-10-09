@@ -1,7 +1,6 @@
-// مهارات علوم ثالث الابتدائي - توزيع 18 أسبوعاً؛ لا يغير بيانات الصفوف الأخرى.
-window.NAFS_MS=window.NAFS_MS||{};
-window.NAFS_MS.science=window.NAFS_MS.science||{};
-window.NAFS_MS.science.g3=[
+// Owner-only grade 3 science trial. Keep the existing public catalogue unchanged.
+(function(){
+ const trial=[
   [
     "عمليات العلم الأساسية — الملاحظة",
     "الملاحظة",
@@ -129,3 +128,21 @@ window.NAFS_MS.science.g3=[
     ]
   ]
 ];
+ async function verify(){
+  try{
+   if(!window.supabase)return;
+   const client=window.supabase.createClient('https://cixwjisioawswnnwwswf.supabase.co','sb_publishable_g9JTqjUOCtU4qBzGBftFcg_7ZMtGVm-',{auth:{storageKey:'nafs-auth',persistSession:true,autoRefreshToken:true}});
+   const auth=await client.auth.getSession();
+   if(!auth.data.session)return;
+   const access=await client.rpc('get_nafs_access');
+   if(access.error||!Array.isArray(access.data)||access.data[0]?.active!==true||access.data[0]?.is_owner!==true)return;
+   window.NAFS_MS=window.NAFS_MS||{};
+   window.NAFS_MS.science=window.NAFS_MS.science||{};
+   window.NAFS_MS.science.g3=trial;
+   window.NAFS_G3_OWNER_TRIAL=true;
+   if(typeof window.loadSubjects==='function')window.loadSubjects();
+   window.dispatchEvent(new Event('nafs-g3-owner-trial-ready'));
+  }catch(err){console.warn('Owner trial unavailable',err)}
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',verify,{once:true});else verify();
+})();
