@@ -67,7 +67,7 @@ async function downloadWeekPdf(){
    };
   });
   sessionStorage.setItem('nafsLessonReturn',location.pathname+location.search);
-  location.href='/nafs-lesson-log-pdf-viewer.html?v=20261012-onetap2';
+  location.href='/nafs-lesson-log-pdf-viewer.html?report='+Date.now()+'&teacher='+encodeURIComponent(currentTeacher)+'&v=20261012-freshreport';
  }catch(e){$('notice').style.display='block';$('notice').textContent='تعذر إنشاء PDF: '+String(e?.message||e)}finally{host?.remove();style?.remove();btn.disabled=false;btn.textContent='تنزيل تقرير PDF'}
 }
 
