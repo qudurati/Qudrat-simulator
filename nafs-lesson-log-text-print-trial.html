@@ -15,18 +15,18 @@ async function makeTextPdf(){
   const info=[['المدرسة',data.school],['المعلمة',data.teacher],['مديرة المدرسة',data.principal],['الصف',data.grade],['المادة',data.subject],['العام الدراسي','1448هـ']];
   const layout={hLineWidth:()=>.65,vLineWidth:()=>.65,hLineColor:()=>'#c8bfe9',vLineColor:()=>'#c8bfe9'};
   for(let page=0;page<2;page++){
-   if(page)doc.content.push({text:'',pageBreak:'before',margin:0});
+   if(page)doc.content.push({text:'',pageBreak:'before'});
    doc.content.push({text:'تدريب نافس — مسرد الحصص الدراسية',bold:true,fontSize:13,color:'#513b9b',fillColor:'#f3f0ff',margin:[0,0,0,4]});
    doc.content.push({table:{widths:Array(6).fill('*'),body:[info.map(([k,v])=>({stack:[{text:k,bold:true,color:'#5c419c',fontSize:8},{text:String(v||'................'),fontSize:8}],alignment:'center',fillColor:'#f6f3ff',margin:[1,3,1,3]}))]},layout,margin:[0,0,0,7]});
    const cards=data.weeks.slice(page*9,page*9+9).map((w,i)=>{
     const lines=[{text:'الأسبوع '+(page*9+i+1)+' — '+w.date,bold:true,color:'#fff',fillColor:'#5b45a8',margin:[3,3,3,3],fontSize:9}];
     for(const l of w.lessons){
-     lines.push({stack:[{text:l.day+' — الحصة '+l.period,bold:true,color:'#4b3994',fontSize:8},{text:String(l.skill||'')+(l.notes?'\n'+l.notes:''),fontSize:7.6,lineHeight:1.1}],margin:[3,3,3,3],fillColor:'#f8f6ff'});
+     lines.push({stack:[{text:l.day+' — الحصة '+l.period,bold:true,color:'#4b3994',fontSize:8},{text:String(l.skill||'')+(l.notes?'\n'+l.notes:''),fontSize:8,lineHeight:1.1}],margin:[3,3,3,3],fillColor:'#f8f6ff'});
     }
     return {table:{widths:['*'],body:lines.map(x=>[x]),dontBreakRows:true},layout};
    });
    for(let row=0;row<3;row++){
-    doc.content.push({table:{widths:['*','*','*'],body:[[cards[row*3],cards[row*3+1],cards[row*3+2]]],heights:[155],dontBreakRows:true},layout,margin:[0,0,0,5]});
+    doc.content.push({table:{widths:['*','*','*'],body:[[cards[row*3],cards[row*3+1],cards[row*3+2]]],dontBreakRows:true},layout,margin:[0,0,0,3]});
    }
    doc.content.push({text:'تدريب نافس — مسرد الحصص',fontSize:7,color:'#6b7280',alignment:'left'});
   }
