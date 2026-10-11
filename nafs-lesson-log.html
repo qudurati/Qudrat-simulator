@@ -31,7 +31,7 @@ async function downloadWeekPdf(){
     const items=lessons.map(lesson=>{const label=lesson.querySelector('b'),p=lesson.querySelector('p');const raw=p.textContent||'';p.replaceChildren();raw.split(/\n+/).map(v=>v.trim()).filter(Boolean).forEach(v=>{const line=document.createElement('div');line.dir='rtl';line.style.cssText='direction:rtl;text-align:right;unicode-bidi:isolate;display:block;white-space:normal;overflow-wrap:break-word;word-break:normal';line.textContent=v;p.appendChild(line)});lesson.style.cssText='border-top:1px solid #ddd7ef;padding:1px 6px 3px;flex:none;min-height:0;box-sizing:border-box;overflow:hidden';label.style.cssText='display:block;font-size:'+(largePrint?13:11)+'px;line-height:1.45;color:#c62828';p.style.cssText='font-family:Tahoma,Arial,sans-serif;font-size:11.5px;line-height:1.45;direction:rtl;text-align:right;white-space:normal;overflow-wrap:break-word;word-break:normal;letter-spacing:normal;margin:0 0 3px';return {lesson,label,p}});
     // Measure the real height of every lesson independently; longer skills receive more space.
     let fit=null;
-    for(let font=(largePrint?14:11.5);font>=7;font-=.5){
+    for(let font=(largePrint?11:11.5);font>=(largePrint?11:7);font-=.5){
      let total=0;const heights=[];
      for(const item of items){
       item.p.style.fontSize=font+'px';item.lesson.style.height='auto';
@@ -41,8 +41,8 @@ async function downloadWeekPdf(){
      if(total<=available){fit={font,heights,total};break}
     }
     if(!fit){
-     fit={font:7,heights:[],total:0};
-     for(const item of items){item.p.style.fontSize='7px';const h=Math.ceil(item.label.getBoundingClientRect().height)+Math.ceil(item.p.getBoundingClientRect().height)+14;fit.heights.push(h);fit.total+=h}
+     fit={font:largePrint?11:7,heights:[],total:0};
+     for(const item of items){item.p.style.fontSize=(largePrint?11:7)+'px';const h=Math.ceil(item.label.getBoundingClientRect().height)+Math.ceil(item.p.getBoundingClientRect().height)+14;fit.heights.push(h);fit.total+=h}
     }
     const remaining=Math.max(0,available-fit.total),weights=fit.heights.map(h=>h/Math.max(1,fit.total));
     items.forEach((item,j)=>{item.p.style.fontSize=fit.font+'px';item.lesson.style.height=(fit.total>available ? available*weights[j] : fit.heights[j]+remaining*weights[j])+'px'});
