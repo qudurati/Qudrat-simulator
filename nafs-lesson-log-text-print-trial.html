@@ -1,5 +1,37 @@
 <!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>مسرد الحصص — طباعة نصية تجريبية</title><style>
 *{box-sizing:border-box}body{margin:0;background:#edf0f5;font-family:Tahoma,Arial,sans-serif;color:#252b3a}.bar{position:sticky;top:0;background:white;padding:12px;display:flex;align-items:center;gap:10px;z-index:5;box-shadow:0 2px 8px #0002}.bar button{border:0;border-radius:8px;padding:11px 18px;font:inherit;background:#eee}.bar .print{background:#17634c;color:#fff}.stage{padding:12px;overflow:auto}.sheet{width:297mm;height:210mm;min-width:297mm;min-height:210mm;background:#fff;margin:0 auto 14px;padding:5mm 7mm 4mm;display:flex;flex-direction:column;break-after:page;page-break-after:always;box-shadow:0 2px 8px #0002}.sheet:last-child{break-after:auto}.heading{background:#f3f0ff;border:1px solid #d6cdf0;padding:2mm 3mm;margin-bottom:3mm}.heading h1{font-size:15px;color:#513b9b;margin:0 0 2mm}.info{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:2mm}.info div{border:1px solid #d4cbea;background:#fff;text-align:center;padding:1mm;min-width:0}.info b{display:block;color:#5c419c;font-size:9px}.info span{font-weight:bold;font-size:10px;overflow-wrap:anywhere}.weeks{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(3,minmax(0,1fr));gap:3mm;flex:1;min-height:0}.week{border:1px solid #c8bfe9;background:#f8f6ff;display:flex;flex-direction:column;min-height:0;overflow:hidden}.week h2{background:#5b45a8;color:white;font-size:11px;padding:2mm;margin:0;flex:none}.lesson{padding:1.2mm 2mm;border-top:1px solid #ddd7ef;flex:1;min-height:0;overflow:hidden}.lesson b{display:block;color:#4b3994;font-size:9px;margin-bottom:1mm}.lesson p{font-size:9px;line-height:1.25;white-space:pre-line;margin:0;overflow-wrap:anywhere}.footer{text-align:left;font-size:9px;color:#6b7280;margin-top:1mm}@page{size:297mm 210mm;margin:0}@media print{html,body{width:297mm!important;min-width:297mm!important;height:auto!important;margin:0!important;padding:0!important}body{background:white}.bar{display:none}.stage{padding:0;overflow:visible}.sheet{width:297mm!important;height:210mm!important;min-width:297mm!important;min-height:210mm!important;max-width:297mm!important;margin:0!important;padding:5mm 7mm 4mm!important;box-shadow:none;break-inside:avoid;overflow:hidden}*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}}@media screen and (max-width:1150px){.stage{overflow-x:auto}.sheet{margin-left:0;margin-right:0}}
-</style></head><body><div class="bar"><button onclick="history.back()">رجوع</button><button class="print" onclick="window.print()">طباعة / حفظ PDF نصي</button><span>تجربة المالك — دون صور</span></div><main class="stage" id="stage"></main><script>
+</style></head><body><div class="bar"><button onclick="history.back()">رجوع</button><button class="print" id="pdfBtn" onclick="makeTextPdf()">فتح PDF نصي أفقي</button><span id="pdfStatus"></span><span>تجربة المالك — دون صور</span></div><main class="stage" id="stage"></main><script>
 const data=JSON.parse(sessionStorage.getItem('nafsLessonTextTrial')||'null');const stage=document.getElementById('stage');if(!data){stage.textContent='ارجع إلى مسرد المالك واضغط «طباعة نصية تجريبية».'}else{const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));const info=[['المدرسة',data.school],['المعلمة',data.teacher],['مديرة المدرسة',data.principal],['الصف',data.grade],['المادة',data.subject],['العام الدراسي','1448هـ']];for(let page=0;page<2;page++){const section=document.createElement('section');section.className='sheet';section.innerHTML='<header class="heading"><h1>تدريب نافس — مسرد الحصص الدراسية</h1><div class="info">'+info.map(([k,v])=>'<div><b>'+escape(k)+'</b><span>'+escape(v||'................')+'</span></div>').join('')+'</div></header><div class="weeks">'+data.weeks.slice(page*9,page*9+9).map((w,i)=>'<article class="week"><h2>الأسبوع '+(page*9+i+1)+' — '+escape(w.date)+'</h2>'+w.lessons.map(l=>'<div class="lesson"><b>'+escape(l.day)+' — الحصة '+escape(l.period)+'</b><p>'+escape(l.skill)+(l.notes?'\n'+escape(l.notes):'')+'</p></div>').join('')+'</article>').join('')+'</div><div class="footer">تدريب نافس — مسرد الحصص</div>';stage.appendChild(section)}} 
+
+async function makeTextPdf(){
+ const btn=document.getElementById('pdfBtn'),status=document.getElementById('pdfStatus');
+ if(!data){status.textContent='لا توجد بيانات مسرد';return}
+ btn.disabled=true;status.textContent='جارٍ تجهيز PDF النصي...';
+ try{
+  if(!window.pdfMake){await new Promise((resolve,reject)=>{const el=document.createElement('script');el.src='/vendor/nafs-pdf/pdfmake.min.js';el.onload=resolve;el.onerror=()=>reject(Error('تعذر تحميل مكتبة PDF'));document.head.appendChild(el)})}
+  const font=location.origin+'/vendor/nafs-pdf/Cairo.ttf';
+  pdfMake.fonts={Cairo:{normal:font,bold:font,italics:font,bolditalics:font}};
+  const doc={pageSize:'A4',pageOrientation:'landscape',pageMargins:[14,12,14,12],defaultStyle:{font:'Cairo',fontSize:8,alignment:'right',color:'#252b3a'},content:[]};
+  const info=[['المدرسة',data.school],['المعلمة',data.teacher],['مديرة المدرسة',data.principal],['الصف',data.grade],['المادة',data.subject],['العام الدراسي','1448هـ']];
+  const layout={hLineWidth:()=>.65,vLineWidth:()=>.65,hLineColor:()=>'#c8bfe9',vLineColor:()=>'#c8bfe9'};
+  for(let page=0;page<2;page++){
+   if(page)doc.content.push({text:'',pageBreak:'before',margin:0});
+   doc.content.push({text:'تدريب نافس — مسرد الحصص الدراسية',bold:true,fontSize:13,color:'#513b9b',fillColor:'#f3f0ff',margin:[0,0,0,4]});
+   doc.content.push({table:{widths:Array(6).fill('*'),body:[info.map(([k,v])=>({stack:[{text:k,bold:true,color:'#5c419c',fontSize:8},{text:String(v||'................'),fontSize:8}],alignment:'center',fillColor:'#f6f3ff',margin:[1,3,1,3]}))]},layout,margin:[0,0,0,7]});
+   const cards=data.weeks.slice(page*9,page*9+9).map((w,i)=>{
+    const lines=[{text:'الأسبوع '+(page*9+i+1)+' — '+w.date,bold:true,color:'#fff',fillColor:'#5b45a8',margin:[3,3,3,3],fontSize:9}];
+    for(const l of w.lessons){
+     lines.push({stack:[{text:l.day+' — الحصة '+l.period,bold:true,color:'#4b3994',fontSize:8},{text:String(l.skill||'')+(l.notes?'\n'+l.notes:''),fontSize:7.6,lineHeight:1.1}],margin:[3,3,3,3],fillColor:'#f8f6ff'});
+    }
+    return {table:{widths:['*'],body:lines.map(x=>[x]),dontBreakRows:true},layout};
+   });
+   for(let row=0;row<3;row++){
+    doc.content.push({table:{widths:['*','*','*'],body:[[cards[row*3],cards[row*3+1],cards[row*3+2]]],heights:[155],dontBreakRows:true},layout,margin:[0,0,0,5]});
+   }
+   doc.content.push({text:'تدريب نافس — مسرد الحصص',fontSize:7,color:'#6b7280',alignment:'left'});
+  }
+  const blob=await new Promise((resolve,reject)=>{try{pdfMake.createPdf(doc).getBlob(resolve)}catch(e){reject(e)}});
+  const url=URL.createObjectURL(blob);window.location.href=url;status.textContent='تم إنشاء PDF نصي أفقي.';
+ }catch(e){status.textContent='تعذر إنشاء PDF: '+e.message}finally{btn.disabled=false}
+}
 </script></body></html>
