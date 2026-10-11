@@ -49,6 +49,23 @@ async function downloadWeekPdf(){
    }
    await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
    const canvas=await html2canvas(sheet,{scale:1.7,useCORS:true,backgroundColor:'#ffffff',logging:false,width:1120,height:792,windowWidth:1120,windowHeight:792});
+   // Paint the live form header directly onto each exported page, independent of HTML snapshot caching.
+   const ctx=canvas.getContext('2d'),scale=canvas.width/1120;
+   ctx.save();ctx.scale(scale,scale);
+   ctx.fillStyle='#f3f0ff';ctx.fillRect(20,12,1080,69);
+   ctx.strokeStyle='#d6cdf0';ctx.strokeRect(20,12,1080,69);
+   ctx.fillStyle='#513b9b';ctx.font='bold 19px Tahoma,Arial';ctx.textAlign='center';ctx.direction='rtl';
+   ctx.fillText('تدريب نافس — مسرد الحصص الدراسية',560,34);
+   const headerFields=[['المدرسة',payload.school],['المعلمة',payload.teacher],['مديرة المدرسة',payload.principal],['الصف',payload.grade],['المادة',payload.subject],['العام الدراسي','1448هـ']];
+   const fieldWidth=172,gap=6,startX=26;
+   headerFields.forEach(([label,value],idx)=>{
+    const x=startX+idx*(fieldWidth+gap);
+    ctx.fillStyle='#fff';ctx.fillRect(x,41,fieldWidth,34);
+    ctx.strokeStyle='#d4cbea';ctx.strokeRect(x,41,fieldWidth,34);
+    ctx.textAlign='center';ctx.direction='rtl';ctx.fillStyle='#5c419c';ctx.font='bold 10px Tahoma,Arial';ctx.fillText(label,x+fieldWidth/2,52,fieldWidth-8);
+    ctx.fillStyle='#252b3a';ctx.font='bold 11px Tahoma,Arial';ctx.fillText(String(value||'................'),x+fieldWidth/2,68,fieldWidth-8);
+   });
+   ctx.restore();
    const binary=atob(canvas.toDataURL('image/jpeg',.92).split(',')[1]),bytes=new Uint8Array(binary.length);for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
    pages.push({width:canvas.width,height:canvas.height,bytes});sheet.remove();
   }
