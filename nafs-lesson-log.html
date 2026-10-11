@@ -52,9 +52,11 @@ async function downloadWeekPdf(){
    const binary=atob(canvas.toDataURL('image/jpeg',.92).split(',')[1]),bytes=new Uint8Array(binary.length);for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
    pages.push({width:canvas.width,height:canvas.height,bytes});sheet.remove();
   }
-  const blob=makePdfFromJpegs(pages),data=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=reject;reader.readAsDataURL(blob)});
-  sessionStorage.setItem('nafsLessonPreviewPages',JSON.stringify(pages.map(im=>{let binary='';for(let k=0;k<im.bytes.length;k+=8192)binary+=String.fromCharCode(...im.bytes.subarray(k,k+8192));return 'data:image/jpeg;base64,'+btoa(binary)})));
-  sessionStorage.setItem('nafsLessonPdf',data);sessionStorage.setItem('nafsLessonPdfName','مسرد-الحصص-'+grade.value+'-'+subject.value+'.pdf');sessionStorage.setItem('nafsLessonReturn',location.pathname+location.search);
+  const blob=makePdfFromJpegs(pages);
+  const previewBlobs=pages.map(im=>new Blob([im.bytes],{type:'image/jpeg'}));
+  await new Promise((resolve,reject)=>{const request=indexedDB.open('nafsLessonPdfStore',1);request.onupgradeneeded=()=>{if(!request.result.objectStoreNames.contains('reports'))request.result.createObjectStore('reports')};request.onerror=()=>reject(request.error);request.onsuccess=()=>{const db=request.result,tx=db.transaction('reports','readwrite');tx.objectStore('reports').put({blob,previewBlobs,name:'مسرد-الحصص-'+grade.value+'-'+subject.value+'.pdf'},'latest');tx.oncomplete=()=>{db.close();resolve()};tx.onerror=()=>{db.close();reject(tx.error)}}});
+  sessionStorage.removeItem('nafsLessonPreviewPages');sessionStorage.removeItem('nafsLessonPdf');
+  sessionStorage.setItem('nafsLessonReturn',location.pathname+location.search);
   location.href='/nafs-lesson-log-pdf-viewer.html';
  }catch(e){$('notice').style.display='block';$('notice').textContent='تعذر إنشاء PDF: '+String(e?.message||e)}finally{host?.remove();style?.remove();btn.disabled=false;btn.textContent='تنزيل تقرير PDF'}
 }
