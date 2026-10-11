@@ -12,20 +12,20 @@ async function makeTextPdfTrial(){
  try{
   const jsPDF=window.jspdf?.jsPDF;
   if(!jsPDF)throw Error('تعذر تحميل محرّك jsPDF');
-  const fonts=await Promise.all(['Amiri-Regular.ttf','Amiri-Bold.ttf'].map(async name=>{
-   const url='https://raw.githubusercontent.com/google/fonts/main/ofl/amiri/'+name;
+  const fonts=await Promise.all(['Tajawal-Regular.ttf','Tajawal-Bold.ttf'].map(async name=>{
+   const url='https://raw.githubusercontent.com/google/fonts/main/ofl/tajawal/'+name;
    const response=await fetch(url);if(!response.ok)throw Error('تعذر تحميل الخط العربي '+name);
    return new Uint8Array(await response.arrayBuffer());
   }));
   const base64=bytes=>{let result='';for(let i=0;i<bytes.length;i+=8192)result+=String.fromCharCode(...bytes.subarray(i,i+8192));return btoa(result)};
   const doc=new jsPDF({orientation:'landscape',unit:'pt',format:'a4',compress:true,putOnlyUsedFonts:true});
-  doc.addFileToVFS('Amiri-Regular.ttf',base64(fonts[0]));doc.addFont('Amiri-Regular.ttf','Amiri','normal');
-  doc.addFileToVFS('Amiri-Bold.ttf',base64(fonts[1]));doc.addFont('Amiri-Bold.ttf','Amiri','bold');
+  doc.addFileToVFS('Tajawal-Regular.ttf',base64(fonts[0]));doc.addFont('Tajawal-Regular.ttf','Tajawal','normal');
+  doc.addFileToVFS('Tajawal-Bold.ttf',base64(fonts[1]));doc.addFont('Tajawal-Bold.ttf','Tajawal','bold');
   doc.setR2L(true);
   const W=841.89,purple='#5945a6',pale='#f8f6ff',ink='#222733',red='#c62828';
   const write=(value,x,y,width,height,size=9,color=ink,bold=false)=>{
    const raw=String(value??'').trim();
-   doc.setFont('Amiri',bold?'bold':'normal');doc.setFontSize(size);doc.setTextColor(color);
+   doc.setFont('Tajawal',bold?'bold':'normal');doc.setFontSize(size);doc.setTextColor(color);
    const lineHeight=size*1.32,maxLines=Math.max(1,Math.floor(height/lineHeight));
    const lines=doc.splitTextToSize(raw||' ',width).slice(0,maxLines);
    lines.forEach((line,i)=>doc.text(line,x+width,y+size+i*lineHeight,{align:'right',isInputRtl:true,isOutputRtl:true}));
@@ -33,27 +33,27 @@ async function makeTextPdfTrial(){
   const info=[['المدرسة',$('schoolName').value],['المعلمة',$('teacherName').value],['مديرة المدرسة',$('schoolAdmin').value],['الصف',grade.selectedOptions[0]?.text||''],['المادة',subject.selectedOptions[0]?.text||'']];
   for(let p=0;p<2;p++){
    if(p)doc.addPage('a4','landscape');
-   doc.setFillColor('#f3f0ff');doc.rect(18,16,W-36,58,'F');
-   write('تدريب نافس — مسرد الحصص الدراسية',18,18,W-36,30,17,purple,true);
-   info.forEach(([k,v],i)=>write(k+' : '+(v||'........'),22+i*160,51,155,19,8,ink,false));
-   const gap=7,left=18,top=82,cw=(W-36-gap*2)/3,ch=151;
+   doc.setFillColor('#f3f0ff');doc.rect(18,16,W-36,62,'F');
+   write('تدريب نافس — مسرد الحصص الدراسية',18,17,W-36,28,15,purple,true);
+   info.forEach(([k,v],i)=>write(k+' : '+(v||'........'),22+i*160,51,155,22,9,ink,false));
+   const gap=10,left=22,top=87,cw=(W-44-gap*2)/3,ch=148;
    for(let i=0;i<9;i++){
     const week=p*9+i,col=i%3,row=Math.floor(i/3),x=left+(2-col)*(cw+gap),y=top+row*(ch+gap);
     doc.setFillColor(pale);doc.setDrawColor('#c8bfe9');doc.rect(x,y,cw,ch,'FD');
-    doc.setFillColor(purple);doc.rect(x,y,cw,24,'F');
+    doc.setFillColor(purple);doc.rect(x,y,cw,27,'F');
     const date=rows[week*per]?.cells[1]?.textContent||'';
-    write('الأسبوع '+(week+1)+' — '+date,x+6,y+2,cw-12,20,10,'#ffffff',true);
-    const lh=(ch-24)/per;
+    write('الأسبوع '+(week+1)+' — '+date,x+9,y+3,cw-18,21,10,'#ffffff',true);
+    const lh=(ch-27)/per;
     for(let j=0;j<per;j++){
-     const tr=rows[week*per+j],ly=y+24+j*lh;
+     const tr=rows[week*per+j],ly=y+27+j*lh;
      if(j){doc.setDrawColor('#ddd7ef');doc.line(x,ly,x+cw,ly)}
-     write((tr.cells[2]?.textContent||'')+' — الحصة '+(tr.cells[3]?.textContent||''),x+6,ly+1,cw-12,15,8,red,true);
+     write((tr.cells[2]?.textContent||'')+' — الحصة '+(tr.cells[3]?.textContent||''),x+9,ly+3,cw-18,16,9,red,true);
      const skill=tr.cells[4]?.querySelector('.editable')?.innerText||'';
      const notes=tr.cells[5]?.querySelector('.editable')?.innerText||'';
      const body=skill+(notes?'\n'+notes:'');
-     let fs=9;doc.setFont('Amiri','normal');
+     let fs=9;doc.setFont('Tajawal','normal');
      while(fs>6){doc.setFontSize(fs);if(doc.splitTextToSize(body,cw-14).length*fs*1.32<=lh-18)break;fs-=.5}
-     write(body,x+7,ly+17,cw-14,Math.max(9,lh-19),fs,ink,false);
+     write(body,x+9,ly+19,cw-18,Math.max(9,lh-21),fs,ink,false);
     }
    }
   }
