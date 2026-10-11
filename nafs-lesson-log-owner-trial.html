@@ -28,7 +28,7 @@ async function makeTextPdfTrial(){
    doc.setFont('Tajawal',bold?'bold':'normal');doc.setFontSize(size);doc.setTextColor(color);
    const lineHeight=size*1.32,maxLines=Math.max(1,Math.floor(height/lineHeight));
    const lines=doc.splitTextToSize(raw||' ',width).slice(0,maxLines);
-   lines.forEach((line,i)=>doc.text(line,x+width,y+size+i*lineHeight,{align:'right',isInputRtl:true,isOutputRtl:true}));
+   lines.forEach((line,i)=>doc.text(line,x+width-5,y+size+i*lineHeight,{align:'right'}));
   };
   const info=[['المدرسة',$('schoolName').value],['المعلمة',$('teacherName').value],['مديرة المدرسة',$('schoolAdmin').value],['الصف',grade.selectedOptions[0]?.text||''],['المادة',subject.selectedOptions[0]?.text||'']];
   for(let p=0;p<2;p++){
