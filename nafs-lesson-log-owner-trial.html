@@ -111,11 +111,22 @@ async function downloadWeekPdf(){
    const binary=atob(canvas.toDataURL('image/jpeg',.92).split(',')[1]),bytes=new Uint8Array(binary.length);for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
    pages.push({width:canvas.width,height:canvas.height,bytes});sheet.remove();
   }
-  const blob=makePdfFromJpegs(pages),data=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=reject;reader.readAsDataURL(blob)});
-  sessionStorage.setItem('nafsLessonPreviewPages',JSON.stringify(pages.map(im=>{let binary='';for(let k=0;k<im.bytes.length;k+=8192)binary+=String.fromCharCode(...im.bytes.subarray(k,k+8192));return 'data:image/jpeg;base64,'+btoa(binary)})));
-  sessionStorage.setItem('nafsLessonPdf',data);sessionStorage.setItem('nafsLessonPdfName','مسرد-الحصص-'+grade.value+'-'+subject.value+'.pdf');sessionStorage.setItem('nafsLessonReturn',location.pathname+location.search);
-  location.href='/nafs-lesson-log-pdf-viewer.html';
- }catch(e){$('notice').style.display='block';$('notice').textContent='تعذر إنشاء PDF: '+String(e?.message||e)}finally{host?.remove();style?.remove();btn.disabled=false;btn.textContent='تنزيل تقرير PDF'}
+  const blob=makePdfFromJpegs(pages);
+  const pdfName='مسرد-الحصص-المالك-'+grade.value+'-'+subject.value+'.pdf';
+  await new Promise((resolve,reject)=>{
+   const req=indexedDB.open('nafsLessonPdfStore',1);
+   req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains('reports'))req.result.createObjectStore('reports')};
+   req.onerror=()=>reject(req.error);
+   req.onsuccess=()=>{
+    const db=req.result,tx=db.transaction('reports','readwrite');
+    tx.objectStore('reports').put({blob,previewBlobs:pages.map(im=>new Blob([im.bytes],{type:'image/jpeg'})),name:pdfName},'latest');
+    tx.oncomplete=()=>{db.close();resolve()};
+    tx.onerror=()=>{db.close();reject(tx.error)};
+   };
+  });
+  sessionStorage.setItem('nafsLessonReturn',location.pathname+location.search);
+  location.href='/nafs-lesson-log-pdf-viewer.html?v=owner-fixed-20261012';
+  }catch(e){$('notice').style.display='block';$('notice').textContent='تعذر إنشاء PDF: '+String(e?.message||e)}finally{host?.remove();style?.remove();btn.disabled=false;btn.textContent='تنزيل تقرير PDF'}
 }
 
 async function init(){try{const session=(await db.auth.getSession()).data.session;if(!session){$('status').textContent='سجل الدخول في نافس أولًا.';return}const {data,error}=await db.rpc('get_nafs_access');if(error||data?.[0]?.is_owner!==true){$('status').textContent='هذه الصفحة لحساب المالك فقط.';return}$('status').textContent='تم التحقق من حساب المالك.';for(const id of ['schoolName','teacherName','schoolAdmin']){$(id).value='';$(id).defaultValue='';$(id).setAttribute('autocomplete','off');}$('teacherName').setAttribute('data-owner-cleared','1');setTimeout(()=>{if($('teacherName').getAttribute('data-owner-cleared')==='1')$('teacherName').value=''},450);sessionStorage.removeItem('nafsLessonPdf');sessionStorage.removeItem('nafsLessonPdfName');sessionStorage.removeItem('nafsLessonPreviewPages');$('app').style.display='block';frame=document.createElement('iframe');frame.style.cssText='position:absolute;left:-12000px;top:0;width:1100px;height:850px;border:0;pointer-events:none';frame.src='/nafs-semester-plan-v3.html?v=20261004-restored-latest';document.body.appendChild(frame);let n=0,t=setInterval(()=>{if(sync()){clearInterval(t);setTimeout(render,600)}else if(++n>50){clearInterval(t);notice.textContent='تعذر تحميل مصدر الخطة.'}},400)}catch(e){$('status').textContent='تعذر التحقق من الحساب.'}}grade.onchange=selectSource;subject.onchange=selectSource;for(const [,id]of days){$(id).onchange=render;$('use_'+id).onchange=()=>{if(!$('use_'+id).checked)$(id).value='';else if(!$(id).value)$(id).value='1';render()};}init();</script>
