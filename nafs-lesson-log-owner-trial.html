@@ -25,19 +25,26 @@ async function downloadWeekPdf(){
    // Compact each lesson according to its actual text height, never silently crop skills.
    // Render complete Arabic text without overlapping lines; avoid export-blocking size checks.
    for(const card of sheet.querySelectorAll('.wk')){
-    const lessons=[...card.querySelectorAll('.ls')];
-    const heading=card.querySelector('h2');
-    const available=card.clientHeight-heading.offsetHeight-2;
-    const items=lessons.map(lesson=>{const label=lesson.querySelector('b'),p=lesson.querySelector('p');lesson.style.flex='none';lesson.style.height='auto';lesson.style.minHeight='0';lesson.style.padding='2px 5px';label.style.cssText='display:block;font-size:10px;line-height:1.5';p.style.cssText='font-size:11px;line-height:1.7;white-space:pre-line;overflow-wrap:anywhere;margin:2px 0 0';return {lesson,label,p}});
-    let best=null;
-    for(let font=11;font>=7;font-=.5){
-     let heights=[],total=0;
-     for(const item of items){item.p.style.fontSize=font+'px';const h=Math.ceil(item.label.getBoundingClientRect().height)+Math.ceil(item.p.getBoundingClientRect().height)+9;heights.push(h);total+=h}
-     if(total<=available){best={font,heights,total};break}
+    const lessons=[...card.querySelectorAll('.ls')],heading=card.querySelector('h2');
+    const available=card.clientHeight-heading.offsetHeight-3;
+    const items=lessons.map(lesson=>{const label=lesson.querySelector('b'),p=lesson.querySelector('p');lesson.style.cssText='border-top:1px solid #ddd7ef;padding:2px 6px;flex:none;min-height:0;box-sizing:border-box;overflow:hidden';label.style.cssText='display:block;font-size:11px;line-height:1.45';p.style.cssText='font-size:11px;line-height:1.6;white-space:pre-line;overflow-wrap:anywhere;margin:2px 0 0';return {lesson,label,p}});
+    // Measure the real height of every lesson independently; longer skills receive more space.
+    let fit=null;
+    for(let font=11;font>=8;font-=.5){
+     let total=0;const heights=[];
+     for(const item of items){
+      item.p.style.fontSize=font+'px';item.lesson.style.height='auto';
+      const height=Math.ceil(item.label.getBoundingClientRect().height)+Math.ceil(item.p.getBoundingClientRect().height)+11;
+      heights.push(height);total+=height;
+     }
+     if(total<=available){fit={font,heights,total};break}
     }
-    if(!best){best={font:7,heights:items.map(()=>available/Math.max(1,items.length)),total:available}}
-    const extra=Math.max(0,(available-best.total)/Math.max(1,items.length));
-    items.forEach((item,j)=>{item.p.style.fontSize=best.font+'px';item.lesson.style.boxSizing='border-box';item.lesson.style.flex='none';item.lesson.style.height=(best.heights[j]+extra)+'px'});
+    if(!fit){
+     fit={font:8,heights:[],total:0};
+     for(const item of items){item.p.style.fontSize='8px';const h=Math.ceil(item.label.getBoundingClientRect().height)+Math.ceil(item.p.getBoundingClientRect().height)+11;fit.heights.push(h);fit.total+=h}
+    }
+    const remaining=Math.max(0,available-fit.total),weights=fit.heights.map(h=>h/Math.max(1,fit.total));
+    items.forEach((item,j)=>{item.p.style.fontSize=fit.font+'px';item.lesson.style.height=(fit.heights[j]+remaining*weights[j])+'px'});
    }
    await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
    const canvas=await html2canvas(sheet,{scale:1.7,useCORS:true,backgroundColor:'#ffffff',logging:false,width:1120,height:792,windowWidth:1120,windowHeight:792});
