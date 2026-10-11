@@ -55,13 +55,14 @@ async function downloadWeekPdf(){
   const blob=makePdfFromJpegs(pages);
   // Keep the familiar one-tap PDF viewer without storing large base64 data in sessionStorage.
   const pdfName='مسرد-الحصص-'+grade.value+'-'+subject.value+'.pdf';
+  const reportId='lesson-'+Date.now()+'-'+Math.random().toString(36).slice(2,9);
   await new Promise((resolve,reject)=>{
    const req=indexedDB.open('nafsLessonPdfStore',1);
    req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains('reports'))req.result.createObjectStore('reports')};
    req.onerror=()=>reject(req.error);
    req.onsuccess=()=>{
     const db=req.result,tx=db.transaction('reports','readwrite');
-    tx.objectStore('reports').put({blob,previewBlobs:pages.map(im=>new Blob([im.bytes],{type:'image/jpeg'})),name:pdfName,teacher:currentTeacher,createdAt:Date.now(),accountId:window.lessonAccess?.user_id||null},'latest');
+    tx.objectStore('reports').put({blob,previewBlobs:pages.map(im=>new Blob([im.bytes],{type:'image/jpeg'})),name:pdfName,teacher:currentTeacher,createdAt:Date.now(),accountId:window.lessonAccess?.user_id||null},reportId);
     tx.oncomplete=()=>{db.close();resolve()};
     tx.onerror=()=>{db.close();reject(tx.error)}
    };
