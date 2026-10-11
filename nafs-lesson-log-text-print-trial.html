@@ -11,24 +11,25 @@ async function makeTextPdf(){
   if(!window.pdfMake){await new Promise((resolve,reject)=>{const el=document.createElement('script');el.src='/vendor/nafs-pdf/pdfmake.min.js';el.onload=resolve;el.onerror=()=>reject(Error('تعذر تحميل مكتبة PDF'));document.head.appendChild(el)})}
   const font=location.origin+'/vendor/nafs-pdf/Cairo.ttf';
   pdfMake.fonts={Cairo:{normal:font,bold:font,italics:font,bolditalics:font}};
-  const doc={pageSize:'A4',pageOrientation:'landscape',pageMargins:[14,12,14,12],defaultStyle:{font:'Cairo',fontSize:8,alignment:'right',color:'#252b3a'},content:[]};
+  const doc={pageSize:'A4',pageOrientation:'landscape',pageMargins:[0,0,0,0],defaultStyle:{font:'Cairo',fontSize:9,alignment:'right',color:'#252b3a'},content:[]};
   const info=[['المدرسة',data.school],['المعلمة',data.teacher],['مديرة المدرسة',data.principal],['الصف',data.grade],['المادة',data.subject],['العام الدراسي','1448هـ']];
-  const layout={hLineWidth:()=>.65,vLineWidth:()=>.65,hLineColor:()=>'#c8bfe9',vLineColor:()=>'#c8bfe9'};
+  const W=841.89,H=595.28,margin=15,gap=7,cardW=(W-2*margin-2*gap)/3,top=92,cardH=153,rowGap=7;
+  function rect(x,y,w,h,fill,line){doc.content.push({canvas:[{type:'rect',x,y,w,h,color:fill,lineColor:line||fill,lineWidth:.7}],absolutePosition:{x:0,y:0}})}
+  function label(value,x,y,w,size,color,bold,height){doc.content.push({text:String(value||''),absolutePosition:{x,y},width:w,fontSize:size,color:color||'#252b3a',bold:!!bold,alignment:'right',lineHeight:1.12,maxHeight:height||100})}
   for(let page=0;page<2;page++){
-   if(page)doc.content.push({text:'',pageBreak:'before'});
-   doc.content.push({text:'تدريب نافس — مسرد الحصص الدراسية',bold:true,fontSize:13,color:'#513b9b',fillColor:'#f3f0ff',margin:[0,0,0,4]});
-   doc.content.push({table:{widths:Array(6).fill('*'),body:[info.map(([k,v])=>({stack:[{text:k,bold:true,color:'#5c419c',fontSize:8},{text:String(v||'................'),fontSize:8}],alignment:'center',fillColor:'#f6f3ff',margin:[1,3,1,3]}))]},layout,margin:[0,0,0,7]});
-   const cards=data.weeks.slice(page*9,page*9+9).map((w,i)=>{
-    const lines=[{text:'الأسبوع '+(page*9+i+1)+' — '+w.date,bold:true,color:'#fff',fillColor:'#5b45a8',margin:[3,3,3,3],fontSize:9}];
-    for(const l of w.lessons){
-     lines.push({stack:[{text:l.day+' — الحصة '+l.period,bold:true,color:'#4b3994',fontSize:8},{text:String(l.skill||'')+(l.notes?'\n'+l.notes:''),fontSize:8,lineHeight:1.1}],margin:[3,3,3,3],fillColor:'#f8f6ff'});
-    }
-    return {table:{widths:['*'],body:lines.map(x=>[x]),dontBreakRows:true},layout};
+   if(page)doc.content.push({text:'',pageBreak:'before',fontSize:1,margin:0});
+   rect(margin,12,W-2*margin,75,'#f3f0ff','#d6cdf0');
+   label('تدريب نافس — مسرد الحصص الدراسية',margin+12,15,W-2*margin-24,14,'#513b9b',true,20);
+   const metaGap=5,metaW=(W-2*margin-20-5*metaGap)/6;
+   info.forEach(([k,v],i)=>{const x=W-margin-10-(i+1)*metaW-i*metaGap;rect(x,40,metaW,40,'#ffffff','#d4cbea');label(k,x+3,43,metaW-6,8,'#5c419c',true,12);label(v||'................',x+3,59,metaW-6,8,'#252b3a',true,17)});
+   data.weeks.slice(page*9,page*9+9).forEach((w,i)=>{
+    const col=i%3,row=Math.floor(i/3),x=W-margin-cardW-col*(cardW+gap),y=top+row*(cardH+rowGap);
+    rect(x,y,cardW,cardH,'#f8f6ff','#c8bfe9');rect(x,y,cardW,25,'#5b45a8','#5b45a8');
+    label('الأسبوع '+(page*9+i+1)+' — '+w.date,x+5,y+5,cardW-10,9,'#ffffff',true,18);
+    const lessons=w.lessons||[],lessonH=(cardH-25)/Math.max(lessons.length,1);
+    lessons.forEach((l,j)=>{const ly=y+25+j*lessonH;if(j)rect(x,ly,cardW,.6,'#ddd7ef');label(l.day+' — الحصة '+l.period,x+6,ly+5,cardW-12,9,'#4b3994',true,13);label(String(l.skill||'')+(l.notes?'\n'+l.notes:''),x+6,ly+20,cardW-12,8.4,'#252b3a',false,Math.max(10,lessonH-23))});
    });
-   for(let row=0;row<3;row++){
-    doc.content.push({table:{widths:['*','*','*'],body:[[cards[row*3],cards[row*3+1],cards[row*3+2]]],dontBreakRows:true},layout,margin:[0,0,0,3]});
-   }
-   doc.content.push({text:'تدريب نافس — مسرد الحصص',fontSize:7,color:'#6b7280',alignment:'left'});
+   label('تدريب نافس — مسرد الحصص',margin,H-17,W-2*margin,7,'#6b7280',false,10);
   }
   const blob=await new Promise((resolve,reject)=>{try{pdfMake.createPdf(doc).getBlob(resolve)}catch(e){reject(e)}});
   const url=URL.createObjectURL(blob);window.location.href=url;status.textContent='تم إنشاء PDF نصي أفقي.';
