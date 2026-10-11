@@ -20,15 +20,15 @@ jobs:
           mkdir -p vendor/nafs-pdf
           curl -fLsS --retry 4 'https://cdn.jsdelivr.net/npm/pdfmake@0.2.20/build/pdfmake.min.js' -o vendor/nafs-pdf/pdfmake.min.js
           curl -fLsS --retry 4 'https://raw.githubusercontent.com/google/fonts/main/ofl/amiri/Amiri-Regular.ttf' -o vendor/nafs-pdf/Amiri-Regular.ttf
-          curl -fLsS --retry 4 'https://raw.githubusercontent.com/google/fonts/main/ofl/notosansarabic/NotoSansArabic%5Bwdth%2Cwght%5D.ttf' -o vendor/nafs-pdf/NotoSansArabic.ttf
+          curl -fLsS --retry 4 'https://raw.githubusercontent.com/google/fonts/main/ofl/cairo/Cairo%5Bslnt%2Cwght%5D.ttf' -o vendor/nafs-pdf/Cairo.ttf
           test "$(wc -c < vendor/nafs-pdf/pdfmake.min.js)" -gt 500000
           test "$(wc -c < vendor/nafs-pdf/Amiri-Regular.ttf)" -gt 100000
-          test "$(wc -c < vendor/nafs-pdf/NotoSansArabic.ttf)" -gt 100000
+          test "$(wc -c < vendor/nafs-pdf/Cairo.ttf)" -gt 100000
       - name: Commit local vendor files
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add vendor/nafs-pdf/pdfmake.min.js vendor/nafs-pdf/Amiri-Regular.ttf vendor/nafs-pdf/NotoSansArabic.ttf
+          git add vendor/nafs-pdf/pdfmake.min.js vendor/nafs-pdf/Amiri-Regular.ttf vendor/nafs-pdf/Cairo.ttf
           if ! git diff --cached --quiet; then
             git commit -m 'Vendor pdfmake and Arabic font locally for NAFS reports'
             git push
