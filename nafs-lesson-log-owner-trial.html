@@ -27,21 +27,21 @@ async function downloadWeekPdf(){
    for(const card of sheet.querySelectorAll('.wk')){
     const lessons=[...card.querySelectorAll('.ls')],heading=card.querySelector('h2');
     const available=card.clientHeight-heading.offsetHeight-3;
-    const items=lessons.map(lesson=>{const label=lesson.querySelector('b'),p=lesson.querySelector('p');lesson.style.cssText='border-top:1px solid #ddd7ef;padding:2px 6px;flex:none;min-height:0;box-sizing:border-box;overflow:hidden';label.style.cssText='display:block;font-size:11px;line-height:1.45';p.style.cssText='font-size:11px;line-height:1.6;white-space:pre-line;overflow-wrap:anywhere;margin:2px 0 0';return {lesson,label,p}});
+    const items=lessons.map(lesson=>{const label=lesson.querySelector('b'),p=lesson.querySelector('p');lesson.style.cssText='border-top:1px solid #ddd7ef;padding:2px 6px;flex:none;min-height:0;box-sizing:border-box;overflow:hidden';label.style.cssText='display:block;font-size:11px;line-height:1.45';p.style.cssText='font-family:Tahoma,Arial,sans-serif;font-size:11px;line-height:1.7;white-space:pre-line;overflow-wrap:break-word;word-break:normal;letter-spacing:normal;margin:3px 0 0';return {lesson,label,p}});
     // Measure the real height of every lesson independently; longer skills receive more space.
     let fit=null;
-    for(let font=11;font>=8;font-=.5){
+    for(let font=11;font>=9;font-=.5){
      let total=0;const heights=[];
      for(const item of items){
       item.p.style.fontSize=font+'px';item.lesson.style.height='auto';
-      const height=Math.ceil(item.label.getBoundingClientRect().height)+Math.ceil(item.p.getBoundingClientRect().height)+11;
+      const height=Math.ceil(item.label.getBoundingClientRect().height)+Math.ceil(item.p.getBoundingClientRect().height)+14;
       heights.push(height);total+=height;
      }
      if(total<=available){fit={font,heights,total};break}
     }
     if(!fit){
-     fit={font:8,heights:[],total:0};
-     for(const item of items){item.p.style.fontSize='8px';const h=Math.ceil(item.label.getBoundingClientRect().height)+Math.ceil(item.p.getBoundingClientRect().height)+11;fit.heights.push(h);fit.total+=h}
+     fit={font:9,heights:[],total:0};
+     for(const item of items){item.p.style.fontSize='9px';const h=Math.ceil(item.label.getBoundingClientRect().height)+Math.ceil(item.p.getBoundingClientRect().height)+14;fit.heights.push(h);fit.total+=h}
     }
     const remaining=Math.max(0,available-fit.total),weights=fit.heights.map(h=>h/Math.max(1,fit.total));
     items.forEach((item,j)=>{item.p.style.fontSize=fit.font+'px';item.lesson.style.height=(fit.heights[j]+remaining*weights[j])+'px'});
