@@ -53,13 +53,21 @@ async function downloadWeekPdf(){
    pages.push({width:canvas.width,height:canvas.height,bytes});sheet.remove();
   }
   const blob=makePdfFromJpegs(pages);
-  // Open the generated PDF directly: iOS Safari may isolate IndexedDB between navigations.
-  const pdfUrl=URL.createObjectURL(blob);
-  const a=document.createElement('a');a.href=pdfUrl;a.target='_blank';a.rel='noopener';a.textContent='فتح ملف PDF';a.style.cssText='display:inline-block;padding:12px 18px;margin:12px;background:#24594b;color:white;border-radius:8px;font-weight:bold;text-decoration:none';
-  $('notice').replaceChildren(document.createTextNode('تم إنشاء التقرير. اضغط لفتح ملف PDF وطباعته أو حفظه: '),a);
-  $('notice').style.display='block';
-  a.onclick=()=>setTimeout(()=>URL.revokeObjectURL(pdfUrl),120000);
-
+  // Keep the familiar one-tap PDF viewer without storing large base64 data in sessionStorage.
+  const pdfName='مسرد-الحصص-'+grade.value+'-'+subject.value+'.pdf';
+  await new Promise((resolve,reject)=>{
+   const req=indexedDB.open('nafsLessonPdfStore',1);
+   req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains('reports'))req.result.createObjectStore('reports')};
+   req.onerror=()=>reject(req.error);
+   req.onsuccess=()=>{
+    const db=req.result,tx=db.transaction('reports','readwrite');
+    tx.objectStore('reports').put({blob,name:pdfName},'latest');
+    tx.oncomplete=()=>{db.close();resolve()};
+    tx.onerror=()=>{db.close();reject(tx.error)}
+   };
+  });
+  sessionStorage.setItem('nafsLessonReturn',location.pathname+location.search);
+  location.href='/nafs-lesson-log-pdf-viewer.html?v=20261012-onetap2';
  }catch(e){$('notice').style.display='block';$('notice').textContent='تعذر إنشاء PDF: '+String(e?.message||e)}finally{host?.remove();style?.remove();btn.disabled=false;btn.textContent='تنزيل تقرير PDF'}
 }
 
