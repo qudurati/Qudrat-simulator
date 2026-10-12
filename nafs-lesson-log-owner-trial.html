@@ -20,12 +20,12 @@ async function makeTextPdfTrial(){
   const header={stack:[{text:'مسرد الحصص الدراسية | تدريب نافس',fontSize:13,bold:true,color:'#5945a6',alignment:'right',margin:[0,0,0,5]},{columns:fields.map(([k,v])=>({text:v+' : '+k,fontSize:8,alignment:'right',noWrap:false})),columnGap:8}],fillColor:'#f3f0ff',margin:[0,0,0,6]};
   const weekCard=index=>{
    const date=rows[index*per]?.cells[1]?.textContent||'';
-   const head={text:[{text:'الأسبوع ',bold:true},{text:String(index+1),bold:true},{text:'   |   '},{text:date}],fillColor:'#5945a6',color:'#ffffff',bold:true,fontSize:9,alignment:'right',margin:[5,5,5,5]};
+   const head={text:'الأسبوع '+(index+1)+'   —   '+date,fillColor:'#5945a6',color:'#ffffff',bold:true,fontSize:9,alignment:'right',margin:[5,5,5,5]};
    const cells=[head];
    for(let j=0;j<per;j++){
     const tr=rows[index*per+j],day=tr.cells[2]?.textContent||'',period=tr.cells[3]?.textContent||'';
     const skill=tr.cells[4]?.querySelector('.editable')?.innerText||'',notes=tr.cells[5]?.querySelector('.editable')?.innerText||'';
-    cells.push({stack:[{text:[{text:day+'   |   ',bold:true},{text:'الحصة '+period,bold:true}],color:'#bd342c',fontSize:8.5,alignment:'right',margin:[0,0,0,4]},{text:skill+(notes?'\n'+notes:''),fontSize:8,alignment:'right',lineHeight:1.1}],fillColor:'#f8f6ff',margin:[6,4,6,4]});
+    cells.push({stack:[{text:day+'   —   الحصة '+period,color:'#bd342c',fontSize:8.5,alignment:'right',margin:[0,0,0,4]},{text:skill+(notes?'\n'+notes:''),fontSize:8,alignment:'right',lineHeight:1.1}],fillColor:'#f8f6ff',margin:[6,4,6,4]});
    }
    return {table:{widths:['*'],body:cells.map(cell=>[cell]),heights:row=>row===0?22:Math.max(26,93/per),dontBreakRows:true},layout:{hLineColor:'#d5ceeb',vLineColor:'#d5ceeb',hLineWidth:()=>0.5,vLineWidth:()=>0.5},margin:[0,0,0,4]};
   };
