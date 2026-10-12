@@ -20,21 +20,22 @@ async function makeTextPdfTrial(){
   const header={stack:[{text:'مسرد الحصص الدراسية | تدريب نافس',fontSize:13,bold:true,color:'#5945a6',alignment:'right',margin:[0,0,0,5]},{columns:fields.map(([k,v])=>({text:v+' : '+k,fontSize:8,alignment:'right',noWrap:false})),columnGap:8}],fillColor:'#f3f0ff',margin:[0,0,0,6]};
   const weekCard=index=>{
    const date=rows[index*per]?.cells[1]?.textContent||'';
-   const cells=[{text:date+' | الأسبوع '+(index+1),fillColor:'#5945a6',color:'#ffffff',bold:true,fontSize:10,alignment:'right',margin:[5,5,5,5]}];
+   const head={text:[{text:'الأسبوع ',bold:true},{text:String(index+1),bold:true},{text:'   |   '},{text:date}],fillColor:'#5945a6',color:'#ffffff',bold:true,fontSize:9,alignment:'right',margin:[5,5,5,5]};
+   const cells=[head];
    for(let j=0;j<per;j++){
     const tr=rows[index*per+j],day=tr.cells[2]?.textContent||'',period=tr.cells[3]?.textContent||'';
     const skill=tr.cells[4]?.querySelector('.editable')?.innerText||'',notes=tr.cells[5]?.querySelector('.editable')?.innerText||'';
-    cells.push({stack:[{text:'الحصة '+period+' | '+day,color:'#bd342c',fontSize:8.5,bold:true,alignment:'right',margin:[0,0,0,4]},{text:skill+(notes?'\n'+notes:''),fontSize:8.5,alignment:'right',lineHeight:1.1}],fillColor:'#f8f6ff',margin:[7,5,7,5]});
+    cells.push({stack:[{text:[{text:day+'   |   ',bold:true},{text:'الحصة '+period,bold:true}],color:'#bd342c',fontSize:8.5,alignment:'right',margin:[0,0,0,4]},{text:skill+(notes?'\n'+notes:''),fontSize:8,alignment:'right',lineHeight:1.1}],fillColor:'#f8f6ff',margin:[6,4,6,4]});
    }
-   return {table:{widths:['*'],body:cells.map(cell=>[cell]),heights:(row)=>row===0?22:Math.max(26,93/per)},layout:{hLineColor:'#d5ceeb',vLineColor:'#d5ceeb',hLineWidth:()=>0.5,vLineWidth:()=>0.5},margin:[0,0,0,4]};
+   return {table:{widths:['*'],body:cells.map(cell=>[cell]),heights:row=>row===0?22:Math.max(26,93/per),dontBreakRows:true},layout:{hLineColor:'#d5ceeb',vLineColor:'#d5ceeb',hLineWidth:()=>0.5,vLineWidth:()=>0.5},margin:[0,0,0,4]};
   };
   const content=[];
   for(let page=0;page<2;page++){
    const pageHeader=JSON.parse(JSON.stringify(header));if(page)pageHeader.pageBreak='before';content.push(pageHeader);
    for(let row=0;row<3;row++){
     const columns=[];
-    for(let col=0;col<3;col++)columns.push({width:'*',stack:[weekCard(page*9+row*3+col)]});
-    content.push({columns:columns.reverse(),columnGap:9,margin:[0,0,0,3]});
+    for(let col=0;col<3;col++)columns.push({width:248,stack:[weekCard(page*9+row*3+col)]});
+    content.push({columns, columnGap:9,margin:[0,0,0,3]});
    }
   }
   const definition={pageSize:'A4',pageOrientation:'landscape',pageMargins:[20,17,20,15],defaultStyle:{font:'Tajawal',alignment:'right',fontSize:9},content};
