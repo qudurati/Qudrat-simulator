@@ -45,7 +45,7 @@ async function downloadWeekPdf(){
      for(const item of items){item.p.style.fontSize='7px';const h=Math.ceil(item.label.getBoundingClientRect().height)+Math.ceil(item.p.getBoundingClientRect().height)+14;fit.heights.push(h);fit.total+=h}
     }
     const remaining=Math.max(0,available-fit.total),weights=fit.heights.map(h=>h/Math.max(1,fit.total));
-    items.forEach((item,j)=>{item.p.style.fontSize=fit.font+'px';item.lesson.style.height=(fit.total>available ? available*weights[j] : fit.heights[j]+remaining*weights[j])+'px'});
+    items.forEach((item,j)=>{item.p.style.fontSize=fit.font+'px';item.lesson.style.height=(fit.total>available ? available*weights[j] : fit.heights[j]+remaining*weights[j])+'px';if(!window.lessonAccess?.is_owner){item.lesson.style.display='flex';item.lesson.style.flexDirection='column';item.lesson.style.justifyContent='center';item.p.style.marginTop='-2px';item.p.style.marginBottom='1px'}});
    }
    await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
    const canvas=await html2canvas(sheet,{scale:1.7,useCORS:true,backgroundColor:'#ffffff',logging:false,width:1120,height:792,windowWidth:1120,windowHeight:792});
